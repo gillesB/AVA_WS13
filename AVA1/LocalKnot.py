@@ -1,7 +1,8 @@
 import json
-from pprint import pprint
 import random
 import socket
+import cPickle
+from Message import Message
 
 __author__ = 'me'
 
@@ -24,15 +25,12 @@ class LocalKnot(Process):
         self.read_input_file()
         self.open_port()
         self.choose_neighbours()
-        '''
         init = True
         while True:
-            message = self.receive_message()
-            self.print_message(message)
+            self.receive_message()
             if init:
-                self.send_ID_to_neighbours()
+                self.send_id_to_neighbours()
                 init = False
-                '''
 
 
     def info(self):
@@ -53,15 +51,34 @@ class LocalKnot(Process):
         self.__port = self.__ips_and_ports[self.__ID]["port"]
         del self.__ips_and_ports[self.__ID]
 
-        self.__listeningSocket = socket.socket()
+        self.__listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host = socket.gethostname()
         self.__listeningSocket.bind((host, self.__port))
+        self.__listeningSocket.listen(5)
 
     def choose_neighbours(self):
         for i in range(3):
-            random_index = random.randint(0, len(self.__ips_and_ports)-1)
+            random_index = random.randint(0, len(self.__ips_and_ports) - 1)
             key = self.__ips_and_ports.keys()[random_index]
             self.__neighbours[key] = self.__ips_and_ports[key]
             del self.__ips_and_ports[key]
+
+    def receive_message(self):
+        connection, addr = self.__listeningSocket.accept()
+        data = connection.recv(1024)
+        if data:
+            message = cPickle.loads(data)
+            print "empfangen: " + message.printToString()
+
+    def send_id_to_neighbours(self):
+        for neighbour in self.__neighbours.values():
+            sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            host = socket.gethostname()
+            #sender.connect((neighbour["ip"], neighbour["port"]))
+            sender.connect((host, neighbour["port"]))
+            own_id_message = Message("ID", self.__ID)
+            sender.sendall(cPickle.dumps(own_id_message))
+            print "gesendet: " + own_id_message.printToString()
+
 
 
