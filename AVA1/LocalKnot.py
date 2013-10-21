@@ -23,6 +23,8 @@ class LocalKnot(Process):
         self.__port = None
         self.__listeningSocket = None
         self.__neighbours = {}
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO, format='%(processName)s : %(asctime)s %(message)s')
 
     def run(self):
         self.info()
@@ -38,12 +40,12 @@ class LocalKnot(Process):
 
 
     def info(self):
-        print 'module name:', __name__
+        info_message = 'module name:' + __name__ + '\n'
         if hasattr(os, 'getppid'):
-            print 'parent process:', os.getppid()
-        print 'process id:', os.getpid()
-        print 'LocalKnot id:', self.__ID
-        print
+            info_message += 'parent process:' + str(os.getppid()) + '\n'
+        info_message += 'process id:' + str(os.getpid()) + '\n'
+        info_message += 'LocalKnot id:' + str(self.__ID) + '\n\n'
+        self.logger.info(info_message)
 
     def read_input_file(self):
         json_data = open('AVA1/json_data')
@@ -72,17 +74,20 @@ class LocalKnot(Process):
         data = connection.recv(1024)
         if data:
             message = cPickle.loads(data)
-            print "empfangen: " + message.printToString()
+            self.logger.info("empfangen: " + message.printToString())
 
     def send_id_to_neighbours(self):
         for neighbour in self.__neighbours.values():
             sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             host = socket.gethostname()
-            #sender.connect((neighbour["ip"], neighbour["port"]))
-            sender.connect((host, neighbour["port"]))
+            try:
+                #sender.connect((neighbour["ip"], neighbour["port"]))
+                sender.connect((host, neighbour["port"]))
+            except:
+                self.logger.error('Error while sending to ' + str(host) + ":" + str(neighbour["port"]), exc_info=1)
             own_id_message = Message("ID", self.__ID)
             sender.sendall(cPickle.dumps(own_id_message))
-            print "gesendet: " + own_id_message.printToString()
+            self.logger.info("gesendet: " + own_id_message.printToString())
 
 
 
