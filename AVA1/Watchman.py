@@ -20,8 +20,8 @@ def send_init_to_zero():
 if __name__ == '__main__':
     for num in range(4):
         print 'Watchman starts', num
-        l = LocalKnot(num)
+        l = LocalKnot(num+1)
         l.start()
         #l.join()
     time.sleep(1)
-    send_init_to_zero()
+    #send_init_to_zero()

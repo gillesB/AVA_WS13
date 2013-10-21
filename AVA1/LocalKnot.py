@@ -1,7 +1,10 @@
 import json
+import logging
 import random
 import socket
 import cPickle
+import sys
+import prctl
 from Message import Message
 
 __author__ = 'me'
@@ -13,6 +16,7 @@ import os
 class LocalKnot(Process):
     def __init__(self, ID):
         super(LocalKnot, self).__init__()
+        prctl.set_proctitle(__name__+'_'+str(ID))
         self.__ID = str(ID)
         self.__ips_and_ports = None
         self.__ip = None
