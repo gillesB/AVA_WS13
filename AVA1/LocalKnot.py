@@ -81,8 +81,7 @@ class LocalKnot(Process):
             sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             host = socket.gethostname()
             try:
-                #sender.connect((neighbour["ip"], neighbour["port"]))
-                sender.connect((host, neighbour["port"]))
+                sender.connect((neighbour["ip"], neighbour["port"]))
             except:
                 self.logger.error('Error while sending to ' + str(host) + ":" + str(neighbour["port"]), exc_info=1)
             own_id_message = Message("ID", self.__ID)
