@@ -6,8 +6,7 @@ import cPickle
 import sys
 
 import prctl
-
-from Message import Message
+from AVA1.AVA1_a.Message import Message
 
 
 __author__ = 'me'

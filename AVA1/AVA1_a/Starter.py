@@ -1,7 +1,6 @@
 import time
-
-from LocalKnot import LocalKnot
-from Watchman import Watchman
+from AVA1.AVA1_a.LocalKnot import LocalKnot
+from AVA1.AVA1_a.Watchman import Watchman
 
 
 __author__ = 'me'
