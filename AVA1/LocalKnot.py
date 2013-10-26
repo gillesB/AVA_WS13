@@ -16,7 +16,7 @@ import os
 class LocalKnot(Process):
     def __init__(self, ID, topology_filename):
         super(LocalKnot, self).__init__()
-        prctl.set_proctitle(__name__ + '_' + str(ID))
+        prctl.set_proctitle(__name__ + '-' + str(ID))
         self.__ID = str(ID)
         self.__topology_filename = topology_filename
         self.__ips_and_ports = None
@@ -24,8 +24,8 @@ class LocalKnot(Process):
         self.__port = None
         self.__listeningSocket = None
         self.__neighbours = {}
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.INFO, format='%(processName)s : %(asctime)s %(message)s')
+        self.logger = logging.getLogger(__name__ + '-' + str(ID))
+        logging.basicConfig(level=logging.INFO, format='%(name)s: %(asctime)s %(message)s')
 
     def run(self):
         self.info()

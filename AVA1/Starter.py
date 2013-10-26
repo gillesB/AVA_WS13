@@ -7,10 +7,9 @@ __author__ = 'me'
 if __name__ == '__main__':
     filename = './json_data'
 
-    for num in range(7):
-        l = LocalKnot(num+1, filename)
+    for num in range(8):
+        l = LocalKnot(num, filename)
         l.start()
-        #l.join()
 
     time.sleep(1)
     watchman = Watchman(filename)
