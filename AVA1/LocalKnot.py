@@ -25,7 +25,7 @@ class LocalKnot(Process):
         self.__listeningSocket = None
         self.__neighbours = {}
         self.logger = logging.getLogger(__name__ + '-' + str(ID))
-        logging.basicConfig(level=logging.INFO, format='%(name)s: %(asctime)s %(message)s')
+        logging.basicConfig(level=logging.INFO, format='%(name)s %(levelname)s %(asctime)s: %(message)s')
 
     def run(self):
         self.info()
