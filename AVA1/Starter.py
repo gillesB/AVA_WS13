@@ -11,6 +11,6 @@ if __name__ == '__main__':
         l = LocalKnot(num, filename)
         l.start()
 
-    time.sleep(1)
+    time.sleep(0.5)
     watchman = Watchman(filename)
     watchman.user_interface()

@@ -74,6 +74,8 @@ class LocalKnot(Process):
         if data:
             message = cPickle.loads(data)
             self.logger.info("empfangen: " + message.printToString())
+            if message.getAction() == 'suicide':
+                sys.exit(0)
 
     def send_id_to_neighbours(self):
         for neighbour in self.__neighbours.values():
