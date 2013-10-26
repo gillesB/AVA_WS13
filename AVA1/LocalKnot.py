@@ -3,7 +3,6 @@ import logging
 import random
 import socket
 import cPickle
-import sys
 import prctl
 from Message import Message
 
@@ -16,7 +15,7 @@ import os
 class LocalKnot(Process):
     def __init__(self, ID):
         super(LocalKnot, self).__init__()
-        prctl.set_proctitle(__name__+'_'+str(ID))
+        prctl.set_proctitle(__name__ + '_' + str(ID))
         self.__ID = str(ID)
         self.__ips_and_ports = None
         self.__ip = None
@@ -38,7 +37,6 @@ class LocalKnot(Process):
                 self.send_id_to_neighbours()
                 init = False
 
-
     def info(self):
         info_message = 'module name:' + __name__ + '\n'
         if hasattr(os, 'getppid'):
@@ -58,8 +56,7 @@ class LocalKnot(Process):
         del self.__ips_and_ports[self.__ID]
 
         self.__listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host = socket.gethostname()
-        self.__listeningSocket.bind((host, self.__port))
+        self.__listeningSocket.bind((self.__ip, self.__port))
         self.__listeningSocket.listen(5)
 
     def choose_neighbours(self):
@@ -79,11 +76,11 @@ class LocalKnot(Process):
     def send_id_to_neighbours(self):
         for neighbour in self.__neighbours.values():
             sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            host = socket.gethostname()
             try:
                 sender.connect((neighbour["ip"], neighbour["port"]))
             except:
-                self.logger.error('Error while sending to ' + str(host) + ":" + str(neighbour["port"]), exc_info=1)
+                self.logger.error('Error while sending to ' + str(neighbour["ip"]) + ":" + str(neighbour["port"]),
+                                  exc_info=1)
             own_id_message = Message("ID", self.__ID)
             sender.sendall(cPickle.dumps(own_id_message))
             self.logger.info("gesendet: " + own_id_message.printToString())
