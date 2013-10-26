@@ -3,8 +3,7 @@ import logging
 import socket
 import json
 import time
-
-from Message import Message
+from AVA1.AVA1_a.Message import Message
 
 
 __author__ = 'me'

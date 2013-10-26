@@ -3,9 +3,12 @@ import logging
 import random
 import socket
 import cPickle
-import prctl
 import sys
+
+import prctl
+
 from Message import Message
+
 
 __author__ = 'me'
 
