@@ -29,16 +29,3 @@ class Watchman:
         init_message = Message('init', 'War... War never changes', True)
         sender.sendall(cPickle.dumps(init_message))
 
-
-if __name__ == '__main__':
-    filename = 'AVA1/json_data'
-
-    for num in range(7):
-        l = LocalKnot(num+1, filename)
-        l.start()
-        #l.join()
-
-    time.sleep(1)
-    watchman = Watchman(filename)
-    watchman.read_input_file()
-    watchman.send_init_to_zero(1)

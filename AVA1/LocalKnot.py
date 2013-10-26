@@ -4,6 +4,7 @@ import random
 import socket
 import cPickle
 import prctl
+import sys
 from Message import Message
 
 __author__ = 'me'
@@ -85,6 +86,12 @@ class LocalKnot(Process):
             own_id_message = Message("ID", self.__ID)
             sender.sendall(cPickle.dumps(own_id_message))
             self.logger.info("gesendet: " + own_id_message.printToString())
+
+if __name__ == '__main__':
+    id = sys.argv[1]
+    filename = sys.argv[2]
+    localKnot = LocalKnot(id, filename)
+    localKnot.run()
 
 
 
