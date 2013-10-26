@@ -16,11 +16,11 @@ import os
 
 
 class LocalKnot(Process):
-    def __init__(self, ID, topology_filename):
+    def __init__(self, ID, connections_filename):
         super(LocalKnot, self).__init__()
         prctl.set_proctitle(__name__ + '-' + str(ID))
         self.__ID = str(ID)
-        self.__topology_filename = topology_filename
+        self.__connections_filename = connections_filename
         self.__ips_and_ports = None
         self.__ip = None
         self.__port = None
@@ -50,7 +50,7 @@ class LocalKnot(Process):
         self.logger.info(info_message)
 
     def read_input_file(self):
-        json_data = open(self.__topology_filename)
+        json_data = open(self.__connections_filename)
         self.__ips_and_ports = json.load(json_data)
         json_data.close()
 
