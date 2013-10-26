@@ -13,7 +13,7 @@ class Message():
         control = ""
         if self.__control:
             control = '(Kontrollnachricht)'
-        return '[' + str(time.time()) + '] ' + control + ' Aktion: ' + str(self.__action) + ' Nachricht: ' + str(self.__message)
+        return control + ' Aktion: ' + str(self.__action) + ' Nachricht: ' + str(self.__message)
 
     def getAction(self):
         return self.__action
