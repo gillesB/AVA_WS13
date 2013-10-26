@@ -13,5 +13,4 @@ if __name__ == '__main__':
 
     time.sleep(1)
     watchman = Watchman(filename)
-    watchman.read_input_file()
-    watchman.send_init_to_zero(1)
+    watchman.user_interface()
