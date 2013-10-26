@@ -12,12 +12,13 @@ __author__ = 'me'
 class Watchman:
 
 
-    def __init__(self):
+    def __init__(self, topology_filename):
         self.__ips_and_ports = ""
+        self.__topology_filename = topology_filename
 
 
     def read_input_file(self):
-        json_data = open('AVA1/json_data')
+        json_data = open(self.__topology_filename)
         self.__ips_and_ports = json.load(json_data)
         json_data.close()
 
@@ -30,12 +31,14 @@ class Watchman:
 
 
 if __name__ == '__main__':
+    filename = 'AVA1/json_data'
+
     for num in range(7):
-        l = LocalKnot(num+1)
+        l = LocalKnot(num+1, filename)
         l.start()
         #l.join()
 
     time.sleep(1)
-    watchman = Watchman()
+    watchman = Watchman(filename)
     watchman.read_input_file()
     watchman.send_init_to_zero(1)
