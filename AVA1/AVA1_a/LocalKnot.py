@@ -18,7 +18,7 @@ import os
 class LocalKnot(Process):
     def __init__(self, ID, connections_filename):
         super(LocalKnot, self).__init__()
-        prctl.set_proctitle(__name__ + '-' + str(ID))
+        prctl.set_proctitle(self._name + '-' + str(ID))
         self.__ID = str(ID)
         self.__connections_filename = connections_filename
         self.__ips_and_ports = None
@@ -40,6 +40,9 @@ class LocalKnot(Process):
             if init:
                 self.send_id_to_neighbours()
                 init = False
+
+    def getID(self):
+        return self.__ID
 
     def info(self):
         info_message = 'module name:' + __name__ + '\n'
@@ -66,9 +69,12 @@ class LocalKnot(Process):
     def choose_neighbours(self):
         for i in range(3):
             random_index = random.randint(0, len(self.__ips_and_ports) - 1)
-            key = self.__ips_and_ports.keys()[random_index]
-            self.__neighbours[key] = self.__ips_and_ports[key]
-            del self.__ips_and_ports[key]
+            ID = self.__ips_and_ports.keys()[random_index]
+            self.add_neighbour(ID)
+
+    def add_neighbour(self, ID):
+        self.__neighbours[ID] = self.__ips_and_ports[ID]
+        del self.__ips_and_ports[ID]
 
     def receive_message(self):
         connection, addr = self.__listeningSocket.accept()
