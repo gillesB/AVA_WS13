@@ -1,6 +1,6 @@
 import time
-from AVA1.AVA1_a.Message import Message
 from CodeBase.AbstractWatchman import AbstractWatchman
+from CodeBase.Message import Message
 
 
 __author__ = 'me'

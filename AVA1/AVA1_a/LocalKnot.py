@@ -1,7 +1,7 @@
 import random
 import sys
 
-from AVA1.AVA1_a.Message import Message
+from CodeBase.Message import Message
 from CodeBase.AbstractKnot import AbstractKnot
 
 
