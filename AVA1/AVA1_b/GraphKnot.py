@@ -8,7 +8,7 @@ class GraphKnot(LocalKnot):
         super(GraphKnot, self).__init__(ID, connections_filename)
         self.__topology_filename = topology_filename
 
-    def choose_neighbours(self):
+    def choose_new_neighbours(self):
         with open(self.__topology_filename, 'rU') as f:
             for line in f:
                 if line[0] == '"':

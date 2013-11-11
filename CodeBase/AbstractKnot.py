@@ -1,7 +1,8 @@
 from abc import abstractmethod
 import json
 import logging
-import random
+from logging import FileHandler
+from random import SystemRandom
 import socket
 import cPickle
 
@@ -24,8 +25,11 @@ class AbstractKnot(Process):
         self.__ip = None
         self.__port = None
         self.__listeningSocket = None
+        self._neighbours = {}
+        self._system_random = SystemRandom()
 
         self.logger = logging.getLogger(__name__ + '-' + str(ID))
+        self.logger.addHandler(FileHandler(self._name + '-' + str(ID) + '.log', 'w'))
         logging.basicConfig(level=logging.INFO, format='%(name)s %(levelname)s %(asctime)s: %(message)s')
 
     def getID(self):
@@ -57,7 +61,7 @@ class AbstractKnot(Process):
         self.read_connections_file()
         self.open_port()
 
-    def receive_message(self):
+    def receive_messages(self):
         connection, addr = self.__listeningSocket.accept()
         data = connection.recv(1024)
         if data:
@@ -66,7 +70,7 @@ class AbstractKnot(Process):
             self.process_received_message(message)
 
     @abstractmethod
-    def process_received_message(self, data):
+    def process_received_message(self, message):
         pass
 
     def send_message_to_id(self, message, ID):
@@ -75,9 +79,18 @@ class AbstractKnot(Process):
             receiver = self._ips_and_ports[str(ID)]
             sender.connect((receiver["ip"], receiver["port"]))
             sender.sendall(cPickle.dumps(message))
-            self.logger.info("gesendet: " + message.printToString())
+            self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
         except:
-            self.logger.error('Error while sending message.', exc_info=1)
+            self.logger.error("Error while sending message to " + ID, exc_info=1)
+
+    def choose_new_neighbours(self, amount_neighbours):
+        self._neighbours.clear()
+        ips_and_ports_copy = self._ips_and_ports.copy()
+        for i in range(amount_neighbours):
+            random_index = self._system_random.randint(0, len(ips_and_ports_copy) - 1)
+            ID = ips_and_ports_copy.keys()[random_index]
+            self._neighbours[ID] = self._ips_and_ports[ID]
+
 
 
 

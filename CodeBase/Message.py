@@ -17,3 +17,6 @@ class Message():
 
     def getAction(self):
         return self.__action
+
+    def getMessage(self):
+        return self.__message
