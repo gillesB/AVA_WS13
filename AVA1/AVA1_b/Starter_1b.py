@@ -1,6 +1,6 @@
 import time
 from AVA1.AVA1_a.Watchman import Watchman
-from AVA1.AVA1_b.LocalKnotGraphviz import LocalKnotGraphviz
+from AVA1.AVA1_b.GraphKnot import GraphKnot
 
 
 __author__ = 'me'
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     topology_filename = './AVA1_b/topology'
 
     for num in range(8):
-        l = LocalKnotGraphviz(num, filename, topology_filename)
+        l = GraphKnot(num, filename, topology_filename)
         l.start()
 
     time.sleep(0.5)
