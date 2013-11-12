@@ -9,11 +9,11 @@ __author__ = 'me'
 
 
 class AbstractWatchman:
-
     def __init__(self, topology_filename):
         self._ips_and_ports = {}
         self.__topology_filename = topology_filename
         self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.DEBUG)
         self.read_input_file()
 
     def read_input_file(self):

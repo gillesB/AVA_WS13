@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import json
 import logging
-from logging import FileHandler
+from logging import FileHandler, Logger
 from random import SystemRandom
 import socket
 import cPickle
@@ -28,9 +28,14 @@ class AbstractKnot(Process):
         self._neighbours = {}
         self._system_random = SystemRandom()
 
-        self.logger = logging.getLogger(__name__ + '-' + str(ID))
-        self.logger.addHandler(FileHandler(self._name + '-' + str(ID) + '.log', 'w'))
-        logging.basicConfig(level=logging.INFO, format='%(name)s %(levelname)s %(asctime)s: %(message)s')
+        self.logger = Logger(__name__ + '-' + str(ID))
+        formatter = logging.Formatter('%(name)s %(levelname)s %(asctime)s: %(message)s')
+        filehandler = FileHandler('./Logging/' + self._name + '-' + str(ID) + '.log', 'w')
+        filehandler.setFormatter(formatter)
+        filehandler.setLevel(logging.NOTSET)
+        for hdlr in self.logger.handlers:  # remove all old handlers
+            self.logger.removeHandler(hdlr)
+        self.logger.addHandler(filehandler)
 
     def getID(self):
         return self._ID
