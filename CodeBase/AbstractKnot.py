@@ -95,6 +95,8 @@ class AbstractKnot(Process):
             random_index = self._system_random.randint(0, len(ips_and_ports_copy) - 1)
             ID = ips_and_ports_copy.keys()[random_index]
             self._neighbours[ID] = self._ips_and_ports[ID]
+            del ips_and_ports_copy[ID]
+        self.logger.info("Neue Nachbarn: " + str(self._neighbours))
 
 
 
