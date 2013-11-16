@@ -5,6 +5,9 @@ from AVA1.AVA1_a.Watchman import Watchman
 
 __author__ = 'me'
 
+'''
+Startet den ersten Teil der ersten Uebung. Erstellt 8 Knoten Prozesse (LocalKnots) und einen Beobachter (Watchman).
+'''
 if __name__ == '__main__':
     filename = './AVA1_a/json_data'
 
