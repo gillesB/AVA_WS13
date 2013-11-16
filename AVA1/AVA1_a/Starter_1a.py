@@ -11,7 +11,7 @@ Startet den ersten Teil der ersten Uebung. Erstellt 8 Knoten Prozesse (LocalKnot
 if __name__ == '__main__':
     filename = './AVA1_a/json_data'
 
-    for num in range(8):
+    for num in range(1, 9):
         l = LocalKnot(num, filename)
         l.start()
 

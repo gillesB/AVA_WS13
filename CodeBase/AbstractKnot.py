@@ -17,7 +17,7 @@ import os
 
 class AbstractKnot(Process):
     '''
-    Ein abstrakter Knoten Prozess. Uebernimmt die einfachsten Aufgaben: Konfigurationsdatei lesen, Port öffnen,
+    Ein abstrakter Knoten Prozess. Uebernimmt die einfachsten Aufgaben: Konfigurationsdatei lesen, Port oeffnen,
     Nachrichten senden
     '''
 
@@ -59,7 +59,7 @@ class AbstractKnot(Process):
 
     def read_connections_file(self):
         '''
-        Liest die Datei mit den Informationen über die Knoten die es ebenfalls im Netzwerk gibt und speichert
+        Liest die Datei mit den Informationen ueber die Knoten die es ebenfalls im Netzwerk gibt und speichert
         sie in ein dictionary.
         Somit sind die IP und der Port der anderen Knoten mittels ihrerer ID abrufbar.
         Bei der Datei, handelt es sich um eine Json Datei, die mit der richtigen Bibliothek einfach geladen werden kann.
@@ -83,7 +83,7 @@ class AbstractKnot(Process):
 
     def read_connections_and_open_port(self):
         '''
-        Fasst die Methoden read_connections_file() und open_port() zusammen. Erst in Üebung 2 benoetigt.
+        Fasst die Methoden read_connections_file() und open_port() zusammen. Erst in Ueebung 2 benoetigt.
         '''
         self.read_connections_file()
         self.open_port()
@@ -110,22 +110,23 @@ class AbstractKnot(Process):
         '''
         Sendet eine Nachricht an den Prozess mit der uebergebenen ID.
         * Oeffnet einen Socket
-        * ermittelt die IP und den Port des Empfängers
+        * ermittelt die IP und den Port des Empfaengers
         * serialisiert die Nachricht und sendet sie an den Empfaenger
         Das Ergebnis wird geloggt.
         '''
-        try:
-            sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            receiver = self._ips_and_ports[str(ID)]
-            sender.connect((receiver["ip"], receiver["port"]))
-            sender.sendall(cPickle.dumps(message))
-            self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
-        except:
-            self.logger.error("Error while sending message to " + ID, exc_info=1)
+        if(ID > 0):
+            try:
+                sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                receiver = self._ips_and_ports[str(ID)]
+                sender.connect((receiver["ip"], receiver["port"]))
+                sender.sendall(cPickle.dumps(message))
+                self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
+            except:
+                self.logger.error("Error while sending message to " + ID, exc_info=1)
 
     def choose_new_neighbours(self, amount_neighbours):
         '''
-        Wähle per Zufall amount_neighbours -viele Nachbarn. Wird in der Uebung 1 einmal aufgerufen,
+        Waehle per Zufall amount_neighbours -viele Nachbarn. Wird in der Uebung 1 einmal aufgerufen,
         in der Uebung 2 mehrmals. Die IDs der neuen Nachbarn werden geloggt.
         '''
         self._neighbours.clear()

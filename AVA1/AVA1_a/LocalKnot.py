@@ -23,7 +23,7 @@ class LocalKnot(AbstractKnot):
         * Initialisiert sich selbst und tritt dann in eine Endlosschleife ein.
         * Wartet auf eine Nachricht
         * Nach dem Empfang der ersten Nachricht, sendet er seine ID zu seinen Nachbarn.
-        * (Außer die erste Nachricht war eine suicide-Nachricht, dann ist der Process bereits beendet.)
+        * (Ausser die erste Nachricht war eine suicide-Nachricht, dann ist der Process bereits beendet.)
         '''
         self.info()
         self.read_connections_file()

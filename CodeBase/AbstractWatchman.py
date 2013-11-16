@@ -21,7 +21,7 @@ class AbstractWatchman:
 
     def read_input_file(self):
         '''
-        Liest die Datei mit den Informationen über die Knoten die es im Netzwerk gibt und speichert
+        Liest die Datei mit den Informationen ueber die Knoten die es im Netzwerk gibt und speichert
         sie in ein dictionary.
         Somit sind die IP und der Port aller Knoten mittels ihrerer ID abrufbar.
         '''
@@ -32,7 +32,7 @@ class AbstractWatchman:
     def send_message_to_id(self, ID, message):
         '''
         Sendet eine Nachricht an den Prozess mit der uebergebenen ID. Oeffnet dabei einen Socket,
-        ermittelt die IP und den Port des Empfängers, serialisiert die Nachricht und sendet sie an den Empfaenger.
+        ermittelt die IP und den Port des Empfaengers, serialisiert die Nachricht und sendet sie an den Empfaenger.
         Das Ergebnis wird geloggt.
         '''
         try:
