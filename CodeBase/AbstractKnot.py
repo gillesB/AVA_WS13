@@ -114,15 +114,14 @@ class AbstractKnot(Process):
         * serialisiert die Nachricht und sendet sie an den Empfaenger
         Das Ergebnis wird geloggt.
         '''
-        if(ID > 0):
-            try:
-                sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                receiver = self._ips_and_ports[str(ID)]
-                sender.connect((receiver["ip"], receiver["port"]))
-                sender.sendall(cPickle.dumps(message))
-                self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
-            except:
-                self.logger.error("Error while sending message to " + ID, exc_info=1)
+        try:
+            sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            receiver = self._ips_and_ports[str(ID)]
+            sender.connect((receiver["ip"], receiver["port"]))
+            sender.sendall(cPickle.dumps(message))
+            self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
+        except:
+            self.logger.error("Error while sending message to " + ID, exc_info=1)
 
     def choose_new_neighbours(self, amount_neighbours):
         '''
