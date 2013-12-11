@@ -6,8 +6,8 @@ __author__ = 'me'
 
 
 class KontoKnot(AbstractKnot):
-    MAX = 1000
-    MAX_DIFF = 5
+    MAX = 100
+    MAX_DIFF = 10
     MAX_N = 4
 
     def __init__(self, ID, connections_filename):
@@ -48,8 +48,11 @@ class KontoKnot(AbstractKnot):
     def send_konto_abzuege(self):
         if self.kontostand > 0:
             konto_abzug = self._system_random.randint(1, KontoKnot.MAX_DIFF)
-            self.choose_new_neighbours(KontoKnot.MAX_N)
-            konto_abzug_message = Message('konto_abzug', konto_abzug)
+
+            amount_neighbours = self._system_random.randint(1, KontoKnot.MAX_N)
+            self.choose_new_neighbours(amount_neighbours)
+
+            konto_abzug_message = Message('konto_abzug', konto_abzug, sender=self._ID)
             self.logger.info("Sende Nachrichten an: " + str(self._neighbours.keys()))
             for neighbourID in self._neighbours.keys():
                 #s um 1 erhoehen
