@@ -14,8 +14,8 @@ class Watchman(AbstractWatchman):
 
     def __init__(self, topology_filename):
         AbstractWatchman.__init__(self, topology_filename)
-        self.__init_message = Message('init', 'Is this the end of the beginning?', True)
-        self.__kill_message = Message('suicide', 'Or the beginning of the end?', True)
+        self._init_message = Message('init', 'Is this the end of the beginning?', True)
+        self._kill_message = Message('suicide', 'Or the beginning of the end?', True)
 
     def terminate_all(self):
         '''
