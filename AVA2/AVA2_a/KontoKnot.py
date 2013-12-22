@@ -14,9 +14,9 @@ class KontoKnot(AbstractKnot):
         super(KontoKnot, self).__init__(ID, connections_filename)
         #init message counters
         #r aus der Angabe
-        self.__amount_messages_received = 0
+        self._amount_messages_received = 0
         #s aus der Angabe
-        self.__amount_messages_sent = 0
+        self._amount_messages_sent = 0
 
         self.kontostand = 0
 
@@ -30,10 +30,10 @@ class KontoKnot(AbstractKnot):
         self.kontostand = self._system_random.randint(KontoKnot.MAX / 2, KontoKnot.MAX)
         self.logger.info('Der Startkontostand betraegt: ' + str(self.kontostand))
 
-    def process_received_message(self, message):
-        #r um 1 erhoehen
-        self.__amount_messages_received += 1
+    def process_received_message(self, connection, message):
         if message.getAction() == 'konto_abzug':
+            #r um 1 erhoehen
+            self._amount_messages_received += 1
             konto_abzug = message.getMessage()
             self.eigener_konto_abzug(konto_abzug)
 
@@ -56,7 +56,7 @@ class KontoKnot(AbstractKnot):
             self.logger.info("Sende Nachrichten an: " + str(self._neighbours.keys()))
             for neighbourID in self._neighbours.keys():
                 #s um 1 erhoehen
-                self.__amount_messages_sent += 1
+                self._amount_messages_sent += 1
                 self.send_message_to_id(konto_abzug_message, neighbourID)
 
 
