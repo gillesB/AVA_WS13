@@ -1,3 +1,4 @@
+from sets import Set
 import time
 import cPickle
 from AVA1.AVA1_a.Watchman import Watchman
@@ -20,17 +21,26 @@ class TimeZoneWatchman(Watchman):
         R = 0
         for localKnot_id in self._ips_and_ports.keys():
             socket = self.send_message_to_id(localKnot_id, self._check_message)
+            timezones = Set()
             if socket:
-                data = socket.recv(1024)
-                if data:
-                    statistics_message = cPickle.loads(data)
-                    S += statistics_message.messages_sent
-                    R += statistics_message.messages_received
+                try:
+                    data = socket.recv(1024)
+                    if data:
+                        statistics_message = cPickle.loads(data)
+                        S += statistics_message.messages_sent
+                        R += statistics_message.messages_received
+                        timezones.add(statistics_message.time_zone)
+                except:
+                    self.logger.error('Error while receiving terminationCheck.', exc_info=1)
+                    S = -1
+                    break
             else:
                 S = -1
                 break
         if S == -1:
             self.logger.error("Fehler bei Terminierungstest.")
+        elif len(timezones) != 1:
+            self.logger.info("Unterschiedliche Zeitzonen. Algo ist NICHT terminiert.")
         elif S == R:
             self.logger.info("Algo ist terminiert.")
         else:

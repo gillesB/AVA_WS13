@@ -8,7 +8,7 @@ __author__ = 'me'
 if __name__ == '__main__':
     filename = './AVA2_a/json_data'
 
-    for num in range(2):
+    for num in range(8):
         l = TimeZoneKontoKnot(num, filename)
         l.start()
 

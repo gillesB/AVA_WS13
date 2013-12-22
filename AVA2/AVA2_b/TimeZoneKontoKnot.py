@@ -10,7 +10,7 @@ class TimeZoneKontoKnot(AbstractKnot):
 
     MAX = 10000
     MAX_DIFF = 1
-    MAX_N = 1
+    MAX_N = 2
 
     def __init__(self, ID, connections_filename):
         super(TimeZoneKontoKnot, self).__init__(ID, connections_filename)
@@ -62,7 +62,7 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.logger.info('Der neue Kontostand betraegt: ' + str(self.kontostand))
 
     def send_konto_abzuege(self):
-        if self.kontostand > 0 and TimeZoneKontoKnot.MAX_N > 0:
+        if self.kontostand > 0:
             konto_abzug = self._system_random.randint(1, TimeZoneKontoKnot.MAX_DIFF)
 
             amount_neighbours = self._system_random.randint(1, TimeZoneKontoKnot.MAX_N)
@@ -71,9 +71,9 @@ class TimeZoneKontoKnot(AbstractKnot):
             konto_abzug_message = TimeZoneMessage('konto_abzug', konto_abzug, sender=self._ID, time_zone=self.__time_zone)
             self.logger.info("Sende Nachrichten an: " + str(self._neighbours.keys()))
             for neighbourID in self._neighbours.keys():
-                #s um 1 erhoehen
-                self._amount_messages_sent += 1
-                self.send_message_to_id(konto_abzug_message, neighbourID)
+                if self.send_message_to_id(konto_abzug_message, neighbourID):
+                    #senden erfolgreich: s um 1 erhoehen
+                    self._amount_messages_sent += 1
 
     def send_amount_messages_to_observer(self, connection, message):
         if self.__saved_s == -1:

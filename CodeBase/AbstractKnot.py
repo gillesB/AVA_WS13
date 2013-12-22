@@ -120,8 +120,10 @@ class AbstractKnot(Process):
             sender.connect((receiver["ip"], receiver["port"]))
             sender.sendall(cPickle.dumps(message))
             self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
+            return True
         except:
             self.logger.error("Error while sending message to " + ID, exc_info=1)
+            return False
 
     def send_message_over_socket(self, socket, message):
         try:

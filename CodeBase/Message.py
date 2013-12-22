@@ -18,6 +18,7 @@ class Message():
         return_str = ""
         if self.__control:
             control = '(Kontrollnachricht) '
+            return_str += control
         return_str = return_str + 'Aktion: ' + str(self.__action) + ' Inhalt: ' + str(self.__message)
         if self.__sender:
             return_str = return_str + ' Sender: ' + str(self.__sender)
