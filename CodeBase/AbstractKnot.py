@@ -100,10 +100,10 @@ class AbstractKnot(Process):
         if data:
             message = cPickle.loads(data)
             self.logger.info("empfangen: " + message.printToString())
-            self.process_received_message(message)
+            self.process_received_message(connection, message)
 
     @abstractmethod
-    def process_received_message(self, message):
+    def process_received_message(self, connection, message):
         pass
 
     def send_message_to_id(self, message, ID):

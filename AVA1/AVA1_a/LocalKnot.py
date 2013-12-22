@@ -36,7 +36,7 @@ class LocalKnot(AbstractKnot):
                 self.send_id_to_neighbours()
                 init = False
 
-    def process_received_message(self, message):
+    def process_received_message(self, connection, message):
         '''
         Der Knoten stoppt sich selbst, sobald er eine Nachricht mit der Aktion 'suicide' empfaengt.
         Die 'init' Nachricht wird nicht extra verarbeitet, d.h. eine Nachricht mit einer anderen Aktion wuerde auch
