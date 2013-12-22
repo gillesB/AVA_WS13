@@ -41,8 +41,10 @@ class AbstractWatchman:
             sender.connect((receiver["ip"], receiver["port"]))
             sender.sendall(cPickle.dumps(message))
             self.logger.info(message.printToString())
+            return sender
         except:
             self.logger.error('Error while sending message.', exc_info=1)
+            return None
 
     @abstractmethod
     def user_interface(self):
