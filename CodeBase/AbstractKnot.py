@@ -123,6 +123,13 @@ class AbstractKnot(Process):
         except:
             self.logger.error("Error while sending message to " + ID, exc_info=1)
 
+    def send_message_over_socket(self, socket, message):
+        try:
+            socket.sendall(cPickle.dumps(message))
+            self.logger.info("gesendet an: " + str(socket) + " Message: " + message.printToString())
+        except:
+            self.logger.error("Error while sending message to " + str(socket), exc_info=1)
+
     def choose_new_neighbours(self, amount_neighbours):
         '''
         Waehle per Zufall amount_neighbours -viele Nachbarn. Wird in der Uebung 1 einmal aufgerufen,
