@@ -1,0 +1,12 @@
+{
+"0":{"ip":"dude", "port":50000, "kind":"philo"},
+"1":{"ip":"dude", "port":50001, "kind":"fork"},
+"2":{"ip":"dude", "port":50002, "kind":"philo"},
+"3":{"ip":"dude", "port":50003, "kind":"fork"},
+"4":{"ip":"dude", "port":50004, "kind":"philo"},
+"5":{"ip":"dude", "port":50005, "kind":"fork"},
+"6":{"ip":"dude", "port":50006, "kind":"philo"},
+"7":{"ip":"dude", "port":50007, "kind":"fork"},
+"8":{"ip":"dude", "port":50008, "kind":"philo"},
+"9":{"ip":"dude", "port":50009, "kind":"fork"}
+}
