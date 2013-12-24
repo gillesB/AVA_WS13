@@ -24,12 +24,12 @@ class TokenForkKnot(AbstractGraphKnot):
     def process_received_message(self, connection, message):
         if message.getAction() == "token":
             # leite Nachricht weiter
-            neighbourID = self.rightNeighbour
-            self.send_message_to_id(message, neighbourID)
+            neighbour_id = self.rightNeighbour
+            self.send_message_to_id(message, neighbour_id)
         elif message.getAction() == "orderFork":
             self.ordered_by = message.getSender()
         elif message.getAction() == "returnFork":
-            self.setFree(message.getSender())
+            self.set_free(message.getSender())
 
     def give_philosopher_a_fork(self):
         if self.ordered_by >= 0:
@@ -37,8 +37,8 @@ class TokenForkKnot(AbstractGraphKnot):
             self.send_message_to_id(philosopher_receives_fork_message, self.ordered_by)
             self.ordered_by = -1
 
-    def setFree(self, requestComesFrom):
-        if requestComesFrom == self.owner:
+    def set_free(self, request_comes_from_id):
+        if request_comes_from_id == self.owner:
             self.free = True
 
 

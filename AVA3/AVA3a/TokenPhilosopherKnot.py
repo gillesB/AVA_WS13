@@ -1,5 +1,4 @@
 import time
-import cPickle
 from CodeBase.AbstractGraphKnot import AbstractGraphKnot
 from CodeBase.Message import Message
 
@@ -15,7 +14,6 @@ class TokenPhilosopherKnot(AbstractGraphKnot):
         self.token = False
         self.has_left_fork = False
         self.has_right_fork = False
-
 
     def run(self):
         self.info()
@@ -38,7 +36,7 @@ class TokenPhilosopherKnot(AbstractGraphKnot):
                 self.receive_messages()
             self.logger.info("I received the right fork.")
             self.eat()
-            self.returnForks()
+            self.return_forks()
             self.send_token_to_next_philosopher()
 
     def think(self):
@@ -61,9 +59,9 @@ class TokenPhilosopherKnot(AbstractGraphKnot):
                 self.has_left_fork = True
 
     def send_token_to_next_philosopher(self):
-        tokenMessage = Message("token", "Ready to eat?", sender=self._ID)
-        neighbourID = self.rightNeighbour
-        self.send_message_to_id(tokenMessage, neighbourID)
+        token_message = Message("token", "Ready to eat?", sender=self._ID)
+        neighbour_id = self.rightNeighbour
+        self.send_message_to_id(token_message, neighbour_id)
         self.token = False
 
     def order_left_fork(self):
@@ -76,11 +74,11 @@ class TokenPhilosopherKnot(AbstractGraphKnot):
         order_fork_message = Message("orderFork", "Are you free?", sender=self._ID)
         self.send_message_to_id(order_fork_message, ID)
 
-    def returnForks(self):
-        returnForkMessage = Message("returnFork", "You are free now.", sender=self._ID)
-        if self.send_message_to_id(returnForkMessage, self.leftNeighbour):
+    def return_forks(self):
+        return_fork_message = Message("returnFork", "You are free now.", sender=self._ID)
+        if self.send_message_to_id(return_fork_message, self.leftNeighbour):
             self.has_left_fork = False
-        if self.send_message_to_id(returnForkMessage, self.rightNeighbour):
+        if self.send_message_to_id(return_fork_message, self.rightNeighbour):
             self.has_right_fork = False
 
 
