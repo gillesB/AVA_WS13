@@ -41,6 +41,6 @@ class BasicForkKnot(AbstractGraphKnot):
         if request_comes_from_id == self.owner:
             self.free = True
             self.owner = None
-            self.logger.info("I have now owner.")
+            self.logger.info("I have no owner.")
 
 
