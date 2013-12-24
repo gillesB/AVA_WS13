@@ -1,7 +1,7 @@
 import time
-from AVA3.AVA3a.TokenWatchman import TokenWatchman
+from AVA3.AVA3b.EdgeChasingForkKnot import EdgeChasingForkKnot
 from AVA3.AVA3b.EdgeChasingPhiloKnot import EdgeChasingPhiloKnot
-from AVA3.PhiloCodeBase.BasicForkKnot import BasicForkKnot
+from AVA3.AVA3b.EdgeChasingWatchman import EdgeChasingWatchman
 
 
 __author__ = 'me'
@@ -18,9 +18,9 @@ if __name__ == '__main__':
         if num % 2 == 0:
             l = EdgeChasingPhiloKnot(num, filename, topology_filename)
         else:
-            l = BasicForkKnot(num, filename, topology_filename)
+            l = EdgeChasingForkKnot(num, filename, topology_filename)
         l.start()
 
     time.sleep(0.5)
-    watchman = TokenWatchman(filename)
+    watchman = EdgeChasingWatchman(filename)
     watchman.user_interface()
