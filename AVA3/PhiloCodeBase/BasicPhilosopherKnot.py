@@ -41,12 +41,20 @@ class BasicPhilosopherKnot(AbstractGraphKnot):
         order_fork_message = Message("orderFork", "Are you free?", sender=self._ID)
         self.send_message_to_id(order_fork_message, ID)
 
-    def return_forks(self):
-        return_fork_message = Message("returnFork", "You are free now.", sender=self._ID)
+    def return_left_fork(self):
+        return_fork_message = Message("returnFork", "Left fork, you are free now.", sender=self._ID)
         if self.send_message_to_id(return_fork_message, self.leftNeighbour):
             self.has_left_fork = False
+
+    def return_right_fork(self):
+        return_fork_message = Message("returnFork", "Right fork, you are free now.", sender=self._ID)
         if self.send_message_to_id(return_fork_message, self.rightNeighbour):
             self.has_right_fork = False
+
+    def return_forks(self):
+        self.return_left_fork()
+        self.return_right_fork()
+
 
 
 
