@@ -10,6 +10,7 @@ class TokenForkKnot(AbstractGraphKnot):
         super(TokenForkKnot, self).__init__(ID, connections_filename, topology_filename)
         self.free = True
         self.owner = None
+        self.ordered_by = -1
 
     def run(self):
         self.info()
@@ -17,24 +18,24 @@ class TokenForkKnot(AbstractGraphKnot):
         self.open_port()
         self.choose_new_neighbours()
         while True:
+            self.give_philosopher_a_fork()
             self.receive_messages()
 
     def process_received_message(self, connection, message):
         if message.getAction() == "token":
-            tokenMessage = Message("token", "Ready to eat?", sender=self._ID)
+            # leite Nachricht weiter
             neighbourID = self.rightNeighbour
-            self.send_message_to_id(tokenMessage, neighbourID)
-        elif message.getAction() == "getFork":
-            self.givePhilosopherAFork(connection, message.getSender())
-        elif message.getAction() == "setFree":
+            self.send_message_to_id(message, neighbourID)
+        elif message.getAction() == "orderFork":
+            self.ordered_by = message.getSender()
+        elif message.getAction() == "returnFork":
             self.setFree(message.getSender())
 
-    def givePhilosopherAFork(self,connection, requester):
-        forkFreeMessage = Message("forkFree", self.free, sender=self._ID)
-        success = self.send_message_over_socket(connection, forkFreeMessage)
-        if self.free and success:
-            self.free = False
-            self.owner = requester
+    def give_philosopher_a_fork(self):
+        if self.ordered_by >= 0:
+            philosopher_receives_fork_message = Message("receiveFork", "A fork for a philiospher.", sender=self._ID)
+            self.send_message_to_id(philosopher_receives_fork_message, self.ordered_by)
+            self.ordered_by = -1
 
     def setFree(self, requestComesFrom):
         if requestComesFrom == self.owner:
