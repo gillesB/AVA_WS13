@@ -45,13 +45,18 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
             if message.getMessage() == self._ID:
                 self.logger.info("A deadlock was found.")
                 self.resolve_deadlock()
-            elif self.waiting:
-                self.send_message_to_id(message, self.rightNeighbour)
+            elif self.waiting_for:
+                self.logger.info("Sending isDeadlock message to requested fork.")
+                self.send_message_to_id(message, self.waiting_for)
             else:
-                self.logger.info("No deadlock was found.")
+                self.logger.info("Not waiting for a fork. No deadlock was found.")
         elif message.getAction() == "checkDeadlock":
             is_deadlock_message = Message("isDeadlock", self._ID, True, self._ID)
-            self.send_message_to_id(is_deadlock_message, self.rightNeighbour)
+            if not self.waiting_for:
+                self.logger.info("Having both forks. No deadlock.")
+            else:
+                self.logger.info("Sending isDeadlock message to requested fork.")
+                self.send_message_to_id(is_deadlock_message, self.waiting_for)
 
     def resolve_deadlock(self):
         if self.has_left_fork:
@@ -63,7 +68,6 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
 
     def order_and_receive_forks(self):
         while not (self.has_right_fork and self.has_left_fork):
-                self.waiting = True
                 if not self.has_right_fork:
                     self.logger.info("Waiting for the right fork.")
                     self.order_right_fork()
@@ -77,7 +81,6 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
                         self.receive_messages()
                     self.logger.info("I received the left fork.")
         if self.has_right_fork and self.has_left_fork:
-            self.waiting = False
             self.logger.info("I received the two forks.")
         else:
             self.logger.error("This should never happen.")

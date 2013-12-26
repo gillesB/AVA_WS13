@@ -13,6 +13,7 @@ class BasicPhilosopherKnot(AbstractGraphKnot):
         super(BasicPhilosopherKnot, self).__init__(ID, connections_filename, topology_filename)
         self.has_left_fork = False
         self.has_right_fork = False
+        self.waiting_for = None
 
     def think(self):
         time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
@@ -30,6 +31,7 @@ class BasicPhilosopherKnot(AbstractGraphKnot):
                 self.has_right_fork = True
             else:
                 self.has_left_fork = True
+            self.waiting_for = None
 
     def order_left_fork(self):
         self.order_fork(self.leftNeighbour)
@@ -38,6 +40,7 @@ class BasicPhilosopherKnot(AbstractGraphKnot):
         self.order_fork(self.rightNeighbour)
 
     def order_fork(self, ID):
+        self.waiting_for = ID
         order_fork_message = Message("orderFork", "Are you free?", sender=self._ID)
         self.send_message_to_id(order_fork_message, ID)
 
