@@ -29,7 +29,7 @@ class AbstractKnot(Process):
         self._ips_and_ports = None
         self.__ip = None
         self.__port = None
-        self.__listeningSocket = None
+        self._listeningSocket = None
         self._neighbours = {}
         self._system_random = SystemRandom()
 
@@ -77,9 +77,9 @@ class AbstractKnot(Process):
         self.__port = self._ips_and_ports[self._ID]["port"]
         del self._ips_and_ports[self._ID]
 
-        self.__listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__listeningSocket.bind((self.__ip, self.__port))
-        self.__listeningSocket.listen(5)
+        self._listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._listeningSocket.bind((self.__ip, self.__port))
+        self._listeningSocket.listen(5)
 
     def read_connections_and_open_port(self):
         '''
@@ -95,7 +95,7 @@ class AbstractKnot(Process):
         * loggt die Nachricht
         * verarbeitet die Nachricht in der abstrakten Methode process_received_message()
         '''
-        connection, addr = self.__listeningSocket.accept()
+        connection, addr = self._listeningSocket.accept()
         data = connection.recv(1024)
         if data:
             message = cPickle.loads(data)
@@ -125,13 +125,13 @@ class AbstractKnot(Process):
             self.logger.error("Error while sending message to " + str(ID), exc_info=1)
             return None
 
-    def send_message_over_socket(self, socket, message):
+    def send_message_over_socket(self, socket1, message):
         try:
-            socket.sendall(cPickle.dumps(message))
-            self.logger.info("gesendet an: " + str(socket) + " Message: " + message.printToString())
+            socket1.sendall(cPickle.dumps(message))
+            self.logger.info("gesendet an: " + str(socket1) + " Message: " + message.printToString())
             return True
         except:
-            self.logger.error("Error while sending message to " + str(socket), exc_info=1)
+            self.logger.error("Error while sending message to " + str(socket1), exc_info=1)
             return False
 
     def choose_new_neighbours(self, amount_neighbours):
