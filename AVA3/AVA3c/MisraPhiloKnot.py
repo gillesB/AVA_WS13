@@ -62,20 +62,20 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
 
     def order_and_receive_forks(self):
         while not (self.has_right_fork and self.has_left_fork):
-                if not self.has_right_fork:
-                    self.logger.info("Waiting for the right fork.")
-                    self.order_right_fork()
-                    while not self.has_right_fork:
-                        self.receive_messages()
-                    self.logger.info("I received the right fork.")
-                    self.right_fork_clean = True
-                if not self.has_left_fork:
-                    self.logger.info("Waiting for the left fork.")
-                    self.order_left_fork()
-                    while not self.has_left_fork:
-                        self.receive_messages()
-                    self.logger.info("I received the left fork.")
-                    self.left_fork_clean = True
+            if not self.has_right_fork:
+                self.logger.info("Waiting for the right fork.")
+                self.order_right_fork()
+                while not self.has_right_fork:
+                    self.receive_messages()
+                self.logger.info("I received the right fork.")
+                self.right_fork_clean = True
+            if not self.has_left_fork:
+                self.logger.info("Waiting for the left fork.")
+                self.order_left_fork()
+                while not self.has_left_fork:
+                    self.receive_messages()
+                self.logger.info("I received the left fork.")
+                self.left_fork_clean = True
         if self.has_right_fork and self.has_left_fork:
             self.logger.info("I received the two forks.")
         else:
@@ -101,16 +101,14 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
         if self.send_message_to_id(force_fork_message, self.leftNeighbour):
             self.has_left_fork = True
             self.left_fork_clean = False
-            
+
     def wait_and_listen(self, seconds):
         now = datetime.datetime.now()
         wait_till = now + datetime.timedelta(0, seconds)
-        print now, wait_till, now < wait_till
-        while now < wait_till:
-            print now, wait_till, now < wait_till
-            self.logger.info("Waiting...")
+        while seconds > 0.0001:
+            self.logger.info("Still waiting for " + str(seconds))
             try:
-                self._listeningSocket.settimeout(1.0)
+                self._listeningSocket.settimeout(seconds)
                 connection, addr = self._listeningSocket.accept()
                 data = connection.recv(1024)
                 if data:
@@ -119,8 +117,9 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
                     self.process_received_message(connection, message)
             except socket.timeout:
                 pass
-            self._listeningSocket.settimeout(None)
             now = datetime.datetime.now()
+            seconds = (wait_till - now).total_seconds()
+        self._listeningSocket.settimeout(None)
 
     def think(self):
         time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
