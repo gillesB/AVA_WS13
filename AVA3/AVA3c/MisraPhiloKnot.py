@@ -1,4 +1,3 @@
-from sets import Set
 import socket
 import time
 import cPickle
@@ -8,13 +7,13 @@ from CodeBase.Message import Message
 
 __author__ = 'me'
 
-class MisraPhiloKnot(BasicPhilosopherKnot):
 
+class MisraPhiloKnot(BasicPhilosopherKnot):
     def __init__(self, ID, connections_filename, topology_filename, force_forks=1):
         super(MisraPhiloKnot, self).__init__(ID, connections_filename, topology_filename)
         self.right_fork_clean = False
         self.left_fork_clean = False
-        self.clean_requests = Set()
+        self.clean_requests = set()
         self.force_forks = force_forks
 
     def run(self):
@@ -38,7 +37,6 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             self.eat()
             self.make_forks_dirty()
             self.treat_clean_requests()
-            #self.return_forks()
 
     def process_received_message(self, connection, message):
         super(MisraPhiloKnot, self).process_received_message(connection, message)
