@@ -1,4 +1,5 @@
-
+import socket
+import struct
 from AVA2.AVA2_b.StatisticsMessage import StatisticsMessage
 from AVA2.AVA2_b.TimeZoneMessage import TimeZoneMessage
 from CodeBase.AbstractKnot import AbstractKnot
@@ -9,7 +10,7 @@ __author__ = 'me'
 class TimeZoneKontoKnot(AbstractKnot):
 
     MAX = 10000
-    MAX_DIFF = 1
+    MAX_DIFF = 100
     MAX_N = 2
 
     def __init__(self, ID, connections_filename):
@@ -26,6 +27,12 @@ class TimeZoneKontoKnot(AbstractKnot):
 
         self.__saved_s = -1
         self.__saved_r = -1
+
+    def open_port(self):
+        super(TimeZoneKontoKnot, self).open_port()
+        timeval = struct.pack("ll", 120, 0)
+        self._listeningSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
+
 
     def run(self):
         self.init_start_konto_betrag()
