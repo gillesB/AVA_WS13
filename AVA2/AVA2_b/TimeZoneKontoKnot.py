@@ -92,3 +92,5 @@ class TimeZoneKontoKnot(AbstractKnot):
 
         stat_message = StatisticsMessage(self._ID, s, r, self.__time_zone)
         self.send_message_over_socket(connection, stat_message)
+        self.__saved_s = -1
+        self.__saved_r = -1
