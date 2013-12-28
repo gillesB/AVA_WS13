@@ -10,24 +10,26 @@ __author__ = 'me'
 
 class MisraPhiloKnot(BasicPhilosopherKnot):
 
-    def __init__(self, ID, connections_filename, topology_filename):
+    def __init__(self, ID, connections_filename, topology_filename, force_forks=1):
         super(MisraPhiloKnot, self).__init__(ID, connections_filename, topology_filename)
         self.right_fork_clean = False
         self.left_fork_clean = False
         self.clean_requests = Set()
+        self.force_forks = force_forks
 
     def run(self):
         self.info()
         self.read_connections_file()
         self.open_port()
         self.choose_new_neighbours()
-        time.sleep(2)
-        if self._ID == str(8):
-            pass
-        else:
+        #Warte eine Sekunde, bis Gabeln bereit sind
+        time.sleep(1)
+        #fordere Anfangsgabeln an
+        if self.force_forks == 1:
             self.force_right_fork()
-            if self._ID == str(0):
-                self.force_left_fork()
+        elif self.force_forks == 2:
+            self.force_right_fork()
+            self.force_left_fork()
         while True:
             self.think()
             self.treat_clean_requests()
@@ -122,12 +124,14 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
         self._listeningSocket.settimeout(None)
 
     def think(self):
-        time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
+        #time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
+        time_to_think = 2
         self.logger.info("I am thinking now for " + str(time_to_think) + " seconds.")
         self.wait_and_listen(time_to_think)
 
     def eat(self):
-        time_to_eat = self._system_random.randint(0, BasicPhilosopherKnot.TIME_EAT_MAX) / 1000.0 # [s = ms / 1000]
+        #time_to_eat = self._system_random.randint(0, BasicPhilosopherKnot.TIME_EAT_MAX) / 1000.0 # [s = ms / 1000]
+        time_to_eat = 2
         self.logger.info("I am eating now for " + str(time_to_eat) + " seconds.")
         self.wait_and_listen(time_to_eat)
 
