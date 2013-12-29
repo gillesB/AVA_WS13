@@ -6,6 +6,9 @@ __author__ = 'me'
 
 
 class KontoKnot(AbstractKnot):
+    '''
+    Ein KontoKnot der Nachrichten an zufaellig gewaehlte Nachbarn sendet um deren Kontostand zu verringern.
+    '''
     MAX = 100
     MAX_DIFF = 10
     MAX_N = 4
@@ -27,11 +30,22 @@ class KontoKnot(AbstractKnot):
             self.receive_messages()
 
     def init_start_konto_betrag(self):
+        '''
+        Waehle den zufaelligen Initialkontostand.
+        '''
         self.kontostand = self._system_random.randint(KontoKnot.MAX / 2, KontoKnot.MAX)
         self.logger.info('Der Startkontostand betraegt: ' + str(self.kontostand))
 
     def process_received_message(self, connection, message):
+        '''
+        Verarbeiten der empfangenen Nachrichten
+        '''
         if message.getAction() == 'konto_abzug':
+            '''
+            * Nachrichtenzaehler r um eins erhoehen.
+            * eigener Kontostand verringern
+            * Nachrichten an Nachbarn senden, so dass diese ihren Kontostand verringern
+            '''
             #r um 1 erhoehen
             self._amount_messages_received += 1
             konto_abzug = message.getMessage()
@@ -42,10 +56,19 @@ class KontoKnot(AbstractKnot):
             self.send_konto_abzuege()
 
     def eigener_konto_abzug(self, value):
+        '''
+        Kontostand verringern
+        '''
         self.kontostand -= value
         self.logger.info('Der neue Kontostand betraegt: ' + str(self.kontostand))
 
     def send_konto_abzuege(self):
+        '''
+        Falls der eigene Kontostand ueber 0:
+            * neue Nachbarn zufaellig waehlen
+            * Wert fuer Kontoabzug zufaellig waehlen
+            * Wert an Nachbarn senden, jeweils Nachrichtenzaehler s um eins erhoehen
+        '''
         if self.kontostand > 0:
             konto_abzug = self._system_random.randint(1, KontoKnot.MAX_DIFF)
 

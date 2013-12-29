@@ -9,13 +9,18 @@ __author__ = 'me'
 
 
 class TimeZoneWatchman(Watchman):
+    '''
+    Ein Terminierungsbeobachter der nach dem Zeitzonenverfahren funktioniert.
+    '''
     def __init__(self, topology_filename):
         Watchman.__init__(self, topology_filename)
         self._check_message = Message('terminationCheck', 'Are you ready?', True)
 
     def check_termination(self):
         '''
-        Sendet checkTermination Nachrichten an alle Knoten.
+        Sendet checkTermination Nachrichten an alle Knotenund erhaelt eine Antwort s und r von diesen.
+        * addiert s und r zu S bzw. R auf
+        * ueberprueft ob alle Prozesse in der gleichen Zeitzone sind
         '''
         S = 0
         R = 0

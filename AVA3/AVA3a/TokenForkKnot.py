@@ -4,6 +4,9 @@ __author__ = 'me'
 
 
 class TokenForkKnot(BasicForkKnot):
+    '''
+    Ein Gabel Knoten der die token Nachricht an seinen rechten Nachbar weiterleitet
+    '''
 
     def __init__(self, ID, connections_filename, topology_filename):
         super(TokenForkKnot, self).__init__(ID, connections_filename, topology_filename)

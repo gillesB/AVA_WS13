@@ -1,4 +1,3 @@
-import time
 from AVA3.PhiloCodeBase.BasicPhilosopherKnot import BasicPhilosopherKnot
 from CodeBase.Message import Message
 
@@ -6,6 +5,10 @@ __author__ = 'me'
 
 
 class TokenPhilosopherKnot(BasicPhilosopherKnot):
+    '''
+    Ein Philosoph der nur essen kann wenn er ein Token besitzt.
+    '''
+
     TIME_THINK_MAX = 4000
     TIME_EAT_MAX = 4000
 
@@ -40,9 +43,13 @@ class TokenPhilosopherKnot(BasicPhilosopherKnot):
     def process_received_message(self, connection, message):
         super(TokenPhilosopherKnot, self).process_received_message(connection, message)
         if message.getAction() == "token":
+            # er erhaelt das Token
             self.token = True
 
     def send_token_to_next_philosopher(self):
+        '''
+        Sende das Token zu dem rechten Nachbar
+        '''
         token_message = Message("token", "Ready to eat?", sender=self._ID)
         neighbour_id = self.rightNeighbour
         self.send_message_to_id(token_message, neighbour_id)

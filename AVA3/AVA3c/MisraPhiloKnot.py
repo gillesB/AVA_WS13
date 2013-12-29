@@ -9,6 +9,9 @@ __author__ = 'me'
 
 
 class MisraPhiloKnot(BasicPhilosopherKnot):
+    '''
+    Ein Philosophenknoten nach Chandy / Misra
+    '''
     def __init__(self, ID, connections_filename, topology_filename, force_forks=1):
         super(MisraPhiloKnot, self).__init__(ID, connections_filename, topology_filename)
         self.right_fork_clean = False
@@ -44,6 +47,11 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             self.clean_requests.add(message.getSender())
 
     def treat_clean_requests(self):
+        '''
+        Bearbeite die Anfragen der Gabel die geputzt werden wollen. Eine Gabel darf nur geputzt
+        werden wenn diese auch schmutzig ist. Mit einer sauberen Gabel muss zuerst gegessen werde.
+        Putze die Gabel und gib sie dann zurueck.
+        '''
         make_clean_message = Message("setClean", True, sender=self._ID)
         if self.leftNeighbour in self.clean_requests:
             if self.has_left_fork and not self.left_fork_clean:
@@ -61,6 +69,9 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
                     self.clean_requests.remove(self.rightNeighbour)
 
     def order_and_receive_forks(self):
+        '''
+        Ordere und erhalte Gabeln.
+        '''
         while not (self.has_right_fork and self.has_left_fork):
             if not self.has_right_fork:
                 self.logger.info("Waiting for the right fork.")
@@ -82,6 +93,9 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             self.logger.error("This should never happen.")
 
     def make_forks_dirty(self):
+        '''
+        Setzte die Gabeln auf schmutzig.
+        '''
         make_dirty_message = Message("setClean", False, sender=self._ID)
         if self.send_message_to_id(make_dirty_message, self.leftNeighbour):
             self.left_fork_clean = False
@@ -91,18 +105,27 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             self.logger.info("The right fork is dirty.")
 
     def force_right_fork(self):
+        '''
+        Erzwinge den Erhalt der rechten Gaabel. (Am Anfang)
+        '''
         force_fork_message = Message("forceFork", sender=self._ID)
         if self.send_message_to_id(force_fork_message, self.rightNeighbour):
             self.has_right_fork = True
             self.right_fork_clean = False
 
     def force_left_fork(self):
+        '''
+        Erzwinge den Erhalt der linken Gaabel. (Am Anfang)
+        '''
         force_fork_message = Message("forceFork", sender=self._ID)
         if self.send_message_to_id(force_fork_message, self.leftNeighbour):
             self.has_left_fork = True
             self.left_fork_clean = False
 
     def wait_and_listen(self, seconds):
+        '''
+        Wartet eine gewisse Zeit und lauscht waehrendem auf dem offenen Port.
+        '''
         now = datetime.datetime.now()
         wait_till = now + datetime.timedelta(0, seconds)
         while seconds > 0.0001:
@@ -120,18 +143,6 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             now = datetime.datetime.now()
             seconds = (wait_till - now).total_seconds()
         self._listeningSocket.settimeout(None)
-
-    def think(self):
-        #time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
-        time_to_think = 2
-        self.logger.info("I am thinking now for " + str(time_to_think) + " seconds.")
-        self.wait_and_listen(time_to_think)
-
-    def eat(self):
-        #time_to_eat = self._system_random.randint(0, BasicPhilosopherKnot.TIME_EAT_MAX) / 1000.0 # [s = ms / 1000]
-        time_to_eat = 2
-        self.logger.info("I am eating now for " + str(time_to_eat) + " seconds.")
-        self.wait_and_listen(time_to_eat)
 
 
 

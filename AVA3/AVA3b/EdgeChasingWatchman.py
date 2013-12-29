@@ -7,7 +7,7 @@ __author__ = 'me'
 class EdgeChasingWatchman(AbstractWatchman):
     '''
     Ein einfacher Beobachter, der von einem Benutzer gesteuert werden kann. Er kann zwei Arten Nachrichten an die Knoten
-    versenden. Init Nachrichten und Suicide Nachrichten.
+    versenden. checkDeadlock Nachrichten und Suicide Nachrichten.
     '''
 
     def __init__(self, topology_filename):
@@ -25,7 +25,7 @@ class EdgeChasingWatchman(AbstractWatchman):
     def user_interface(self):
         '''
         Schreibt Nachrichten an den Benutzer und empfaengt Befehle von diesem.
-        * sende init Nachricht an Knoten mit ID
+        * sende checkDeadlock Nachricht an Knoten mit ID
         * sende suicide Nachricht an Knoten mit ID
         * sende suicide Nachricht an alle Knoten
         '''

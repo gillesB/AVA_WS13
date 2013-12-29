@@ -1,5 +1,4 @@
 import socket
-import struct
 import datetime
 import cPickle
 from AVA2.AVA2_b.StatisticsMessage import StatisticsMessage
@@ -10,6 +9,9 @@ __author__ = 'me'
 
 
 class TimeZoneKontoKnot(AbstractKnot):
+    '''
+    Urspruenglich eine Kopie von KontoKnot wurde erweitert um das Zeitzonenverfahren zu ermoeglichen.
+    '''
 
     MAX = 10000
     MAX_DIFF = 10
@@ -30,6 +32,7 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.__saved_s = -1
         self.__saved_r = -1
 
+        #Anzahl wie haeufig die Kontoabzuge an die Nachbarn versendet werden muessen
         self.amount_abzuege = 0
 
     def run(self):
@@ -38,6 +41,9 @@ class TimeZoneKontoKnot(AbstractKnot):
         while True:
             self.send_konto_abzuege()
             #self.receive_messages()
+            #Der Prozess lauscht nur fuer eine kurze Zeit, ehe wieder gesendet werden kann.
+            #Dies fuegt eine kuenstliche Pause ein, so dass nicht alle Knoten gleichzeitig senden
+            #und sich nicht gegenseitig blockieren.
             self.wait_and_listen(self._system_random.random() * 0.01)
 
     def init_start_konto_betrag(self):
@@ -70,6 +76,10 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.logger.info('Der neue Kontostand betraegt: ' + str(self.kontostand))
 
     def send_konto_abzuege(self):
+        '''
+        Da diese Funktion oefter aufgerufen wird als noetig, muss ueberprueft werden ob ueberhaupt gesendet werden darf.
+        Dies geschiet ueber amount_abzuege.
+        '''
         if self.kontostand > 0 and self.amount_abzuege > 0:
             konto_abzug = self._system_random.randint(1, TimeZoneKontoKnot.MAX_DIFF)
 
@@ -86,6 +96,11 @@ class TimeZoneKontoKnot(AbstractKnot):
             self.amount_abzuege -= 1
 
     def send_amount_messages_to_observer(self, connection, message):
+        '''
+        Sende s und r an den Beobachter. Dies erfolgt ueber den gleichen Socket, der die Ueberpruefungsnachricht
+        erhalten hat. Falls durch einen Zeitzonenwechsel s und r zwischengespeichert wurden, so werden diese
+        zurueckgesendet.
+        '''
         if self.__saved_s == -1:
             s = self._amount_messages_sent
             r = self._amount_messages_received
@@ -99,6 +114,9 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.__saved_r = -1
 
     def wait_and_listen(self, seconds):
+        '''
+        Wartet eine gewisse Zeit und lauscht waehrendem auf dem offenen Port.
+        '''
         now = datetime.datetime.now()
         wait_till = now + datetime.timedelta(0, seconds)
         while seconds > 0.0001:
