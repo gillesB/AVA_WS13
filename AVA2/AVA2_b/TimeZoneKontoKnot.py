@@ -32,11 +32,6 @@ class TimeZoneKontoKnot(AbstractKnot):
 
         self.amount_abzuege = 0
 
-    def open_port(self):
-        super(TimeZoneKontoKnot, self).open_port()
-        timeval = struct.pack("ll", 120, 0)
-        self._listeningSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
-
     def run(self):
         self.init_start_konto_betrag()
         self.read_connections_and_open_port()

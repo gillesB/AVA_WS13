@@ -50,8 +50,6 @@ class TimeZoneWatchman(Watchman):
 
     def send_check_message(self, timezones, localKnot_id):
         socket_o = self.send_message_to_id(localKnot_id, self._check_message)
-        timeval = struct.pack("ll", 120, 0)
-        socket_o.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, timeval)
         if socket_o:
             data = socket_o.recv(1024)
             if data:
