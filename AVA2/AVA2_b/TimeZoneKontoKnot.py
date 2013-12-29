@@ -1,5 +1,7 @@
 import socket
 import struct
+import datetime
+import cPickle
 from AVA2.AVA2_b.StatisticsMessage import StatisticsMessage
 from AVA2.AVA2_b.TimeZoneMessage import TimeZoneMessage
 from CodeBase.AbstractKnot import AbstractKnot
@@ -10,7 +12,7 @@ __author__ = 'me'
 class TimeZoneKontoKnot(AbstractKnot):
 
     MAX = 10000
-    MAX_DIFF = 100
+    MAX_DIFF = 10
     MAX_N = 2
 
     def __init__(self, ID, connections_filename):
@@ -28,17 +30,20 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.__saved_s = -1
         self.__saved_r = -1
 
+        self.amount_abzuege = 0
+
     def open_port(self):
         super(TimeZoneKontoKnot, self).open_port()
         timeval = struct.pack("ll", 120, 0)
         self._listeningSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
 
-
     def run(self):
         self.init_start_konto_betrag()
         self.read_connections_and_open_port()
         while True:
-            self.receive_messages()
+            self.send_konto_abzuege()
+            #self.receive_messages()
+            self.wait_and_listen(self._system_random.random() * 0.01)
 
     def init_start_konto_betrag(self):
         self.kontostand = self._system_random.randint(TimeZoneKontoKnot.MAX / 2, TimeZoneKontoKnot.MAX)
@@ -48,13 +53,14 @@ class TimeZoneKontoKnot(AbstractKnot):
         if message.getAction() == 'konto_abzug':
             self.process_konto_abzug(connection,message)
         elif message.getAction() == 'init':
+            self.amount_abzuege = 1
             self.send_konto_abzuege()
         elif message.getAction() == "terminationCheck":
             self.__time_zone += 1
             self.send_amount_messages_to_observer(connection, message)
 
     def process_konto_abzug(self, connection, message):
-        if self.__time_zone < message.time_zone:
+        if self.__saved_s == -1 and self.__time_zone < message.time_zone:
             self.__saved_s = self._amount_messages_sent
             self.__saved_r = self._amount_messages_received
         #r um 1 erhoehen
@@ -62,14 +68,14 @@ class TimeZoneKontoKnot(AbstractKnot):
         konto_abzug = message.getMessage()
         self.eigener_konto_abzug(konto_abzug)
 
-        self.send_konto_abzuege()
+        self.amount_abzuege += 1
 
     def eigener_konto_abzug(self, value):
         self.kontostand -= value
         self.logger.info('Der neue Kontostand betraegt: ' + str(self.kontostand))
 
     def send_konto_abzuege(self):
-        if self.kontostand > 0:
+        if self.kontostand > 0 and self.amount_abzuege > 0:
             konto_abzug = self._system_random.randint(1, TimeZoneKontoKnot.MAX_DIFF)
 
             amount_neighbours = self._system_random.randint(1, TimeZoneKontoKnot.MAX_N)
@@ -81,6 +87,8 @@ class TimeZoneKontoKnot(AbstractKnot):
                 if self.send_message_to_id(konto_abzug_message, neighbourID):
                     #senden erfolgreich: s um 1 erhoehen
                     self._amount_messages_sent += 1
+
+            self.amount_abzuege -= 1
 
     def send_amount_messages_to_observer(self, connection, message):
         if self.__saved_s == -1:
@@ -94,3 +102,22 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.send_message_over_socket(connection, stat_message)
         self.__saved_s = -1
         self.__saved_r = -1
+
+    def wait_and_listen(self, seconds):
+        now = datetime.datetime.now()
+        wait_till = now + datetime.timedelta(0, seconds)
+        while seconds > 0.0001:
+            #self.logger.info("Still waiting for " + str(seconds))
+            try:
+                self._listeningSocket.settimeout(seconds)
+                connection, addr = self._listeningSocket.accept()
+                data = connection.recv(1024)
+                if data:
+                    message = cPickle.loads(data)
+                    self.logger.info("empfangen: " + message.printToString())
+                    self.process_received_message(connection, message)
+            except socket.timeout:
+                pass
+            now = datetime.datetime.now()
+            seconds = (wait_till - now).total_seconds()
+        self._listeningSocket.settimeout(None)

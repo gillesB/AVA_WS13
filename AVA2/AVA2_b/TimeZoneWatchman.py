@@ -19,6 +19,7 @@ class TimeZoneWatchman(Watchman):
         '''
         S = 0
         R = 0
+        failed = True
         timezones = set()
         for localKnot_id in self._ips_and_ports.keys():
             for i in range(3):
@@ -28,15 +29,17 @@ class TimeZoneWatchman(Watchman):
                     s, r = self.send_check_message(timezones, localKnot_id)
                     S += s
                     R += r
+                    failed = False
                     break
                 except:
                     self.logger.error('Error while receiving terminationCheck.', exc_info=1)
-                    S = -1
-            if S == -1:
+                    failed = True
+            if failed:
                 self.logger.error("I give up sending Termination Check Message to " + str(localKnot_id) + ".")
                 break
+            time.sleep(1)
 
-        if S == -1:
+        if failed:
             self.logger.error("Fehler bei Terminierungstest.")
         elif len(timezones) != 1:
             self.logger.info("Unterschiedliche Zeitzonen. Algo ist NICHT terminiert.")
