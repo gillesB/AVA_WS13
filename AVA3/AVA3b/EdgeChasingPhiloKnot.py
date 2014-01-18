@@ -24,7 +24,7 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
             self.eat()
             self.return_forks()
 
-    #Uberschreibungen den Methoden die wahrscheinlich Deadlock auslösen
+    #Uberschreibungen den Methoden die wahrscheinlich Deadlock ausloesen
     def think(self):
         time_to_think = 2  # [s = ms / 1000]
         self.logger.info("I am thinking now for " + str(time_to_think) + " seconds.")
@@ -89,7 +89,7 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
     def resolve_deadlock(self):
         '''
         Deadlock aufloesen. Falls man linke Gabel hat, dann wird diese zurueckgegeben. Falls man die rechte Gabel hat,
-        dann wird diese zurückgegeben.
+        dann wird diese zurueckgegeben.
         '''
         if self.has_left_fork:
             self.logger.info("To resolve the deadlock, I return my left fork.")

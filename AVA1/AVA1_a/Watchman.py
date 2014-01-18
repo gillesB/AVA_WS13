@@ -22,7 +22,7 @@ class Watchman(AbstractWatchman):
         Sendet Suicide Nachrichten an alle Knoten.
         '''
         for localKnot_id in self._ips_and_ports.keys():
-            self.send_message_to_id(localKnot_id, self.__kill_message)
+            self.send_message_to_id(localKnot_id, self._kill_message)
 
     def user_interface(self):
         '''
@@ -36,9 +36,9 @@ class Watchman(AbstractWatchman):
             user_input = raw_input('$ ').split(' ')
             command = user_input[0]
             if command == 'init' or command == 'i':
-                self.send_message_to_id(user_input[1], self.__init_message)
+                self.send_message_to_id(user_input[1], self._init_message)
             elif command == 'kill' or command == 'k':
-                self.send_message_to_id(user_input[1], self.__kill_message)
+                self.send_message_to_id(user_input[1], self._kill_message)
             elif command == 'killAll' or command == 'ka':
                 self.terminate_all()
             else:

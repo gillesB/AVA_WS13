@@ -38,7 +38,7 @@ class MisraForkKnot(BasicForkKnot):
                 self.logger.info("I am dirty now.")
             self.clean = message.getMessage()
         elif message.getAction() == "forceFork":
-            # wird fuer die initialisierung benötigt.
+            # wird fuer die initialisierung benoetigt.
             self.owner = message.getSender()
             self.free = False
 
