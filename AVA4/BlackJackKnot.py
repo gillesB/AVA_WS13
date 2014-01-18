@@ -112,9 +112,9 @@ class BlackJackKnot(AbstractKnot):
     def give_card_to_players(self):
         self.logger.debug("Giving cards to players.")
         for ID in self.order_of_players.values():
-            print ID
             card_message = self.draw_card()
-            self.send_message_to_id(ID, card_message)
+            self.send_message_to_id(card_message, ID)
+        self.logger.debug("Giving cards to players. Finished")
 
     def draw_card(self):
         number = self._system_random.randint(2,11)
