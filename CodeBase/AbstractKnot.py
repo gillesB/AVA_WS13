@@ -79,7 +79,7 @@ class AbstractKnot(Process):
 
         self._listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._listeningSocket.bind((self.__ip, self.__port))
-        self._listeningSocket.listen(5)
+        self._listeningSocket.listen(100)
 
     def read_connections_and_open_port(self):
         '''
