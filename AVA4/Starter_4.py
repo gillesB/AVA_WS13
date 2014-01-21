@@ -8,4 +8,6 @@ if __name__ == '__main__':
 
     for num in range(8):
         l = BlackJackKnot(num, filename, 5)
+        if num == 0:
+            l.token = True
         l.start()

@@ -77,9 +77,10 @@ class AbstractKnot(Process):
         self.__port = self._ips_and_ports[self._ID]["port"]
         del self._ips_and_ports[self._ID]
 
-        self._listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self._listeningSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._listeningSocket = socket.socket()
         self._listeningSocket.bind((self.__ip, self.__port))
-        self._listeningSocket.listen(100)
+        self._listeningSocket.listen(1000)
 
     def read_connections_and_open_port(self):
         '''
@@ -102,6 +103,20 @@ class AbstractKnot(Process):
             self.logger.info("empfangen: " + message.printToString())
             self.process_received_message(connection, message)
 
+    def return_received_message(self):
+        '''
+        * Empfaengt eine Nachricht auf dem Port auf dem der Prozess hoert.
+        * Deserialisiert die Nachricht
+        * loggt die Nachricht
+        * verarbeitet die Nachricht in der abstrakten Methode process_received_message()
+        '''
+        connection, addr = self._listeningSocket.accept()
+        data = connection.recv(1024)
+        if data:
+            message = cPickle.loads(data)
+            self.logger.info("empfangen: " + message.printToString())
+            return connection, message
+
     @abstractmethod
     def process_received_message(self, connection, message):
         pass
@@ -114,16 +129,18 @@ class AbstractKnot(Process):
         * serialisiert die Nachricht und sendet sie an den Empfaenger
         Das Ergebnis wird geloggt.
         '''
-        try:
-            sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            receiver = self._ips_and_ports[str(ID)]
-            sender.connect((receiver["ip"], receiver["port"]))
-            sender.sendall(cPickle.dumps(message))
-            self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
-            return sender
-        except:
-            self.logger.error("Error while sending message to " + str(ID), exc_info=1)
-            return None
+        for i in range(3):
+            try:
+                #sender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sender = socket.socket()
+                receiver = self._ips_and_ports[str(ID)]
+                sender.connect((receiver["ip"], receiver["port"]))
+                sender.sendall(cPickle.dumps(message))
+                self.logger.info("gesendet an: " + str(ID) + " Message: " + message.printToString())
+                return sender
+            except:
+                self.logger.error("Error while sending message to " + str(ID), exc_info=1)
+        return None
 
     def send_message_over_socket(self, socket1, message):
         try:
