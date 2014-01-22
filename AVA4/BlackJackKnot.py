@@ -18,14 +18,13 @@ class BlackJackKnot(AbstractKnot):
         self.amount_rounds = amount_rounds
         self.role = None
         self.end_of_round = False
-        self.order_of_players = {}
-        self.croupierID = None
+        self.order_of_players = []
+        self.croupier_id = None
         self.own_cards = []
         self.final_result = None
         self.results = {}
-        self.stay_message = Message("stay", "No other card, please.", sender=self._ID)
-        self.hit_message = Message("hit", "Hit me with another card.", sender=self._ID)
         self.token = False
+        self.croupier_card = None
 
     def run(self):
         self.info()
@@ -38,49 +37,79 @@ class BlackJackKnot(AbstractKnot):
             self.own_cards = []
             while not self.end_of_round:
                 if self.role == self.CROUPIER:
-                    # Spieler erhalten zwei Anfangskarten, Croupier eine
-                    self.give_card_to_players()
-                    self.draw_croupier_card()
-                    self.give_card_to_players()
-                    #Bediene Spieler
-                    self.ask_players()
-                    #Ziehe eigne zweite Karte
-                    self.draw_croupier_card()
-                    #Ziehe weitere eigene Karten
-                    self.final_result = self.draw_own_cards()
-                    self.results[self._ID] = self.final_result
-                    #Erhalte Resultat von Spielern
-                    self.retrieve_results()
-                    #Ermittle Gewinner
-                    self.logger.info("Croupier hand: " + str(self.own_cards))
-                    self.logger.info("Croupier result: " + str(self.final_result))
-                    winners = self.determine_winners()
-                    #Sende Gewinner
-                    self.send_winners(winners)
-                    #teile Ende der Runde mit
-                    self.declare_end_of_round()
+                    self.execution_croupier()
                 else:
-                    self.receive_messages()
+                    self.execution_player()
             self.logger.info("END OF ROUND!")
         self.logger.info("I am going to kill myself.")
         sys.exit()
 
+    def execution_player(self):
+        #draw first card
+        self.wait_for_token()
+        self.draw_single_card()
+        self.send_token_to_the_left()
+
+        #draw second card
+        self.wait_for_token()
+        self.draw_single_card()
+        self.send_token_to_the_left()
+
+        #receive card from croupier
+        self.receive_messages()
+
+        #draw_cards
+        self.wait_for_token()
+        self.draw_more_cards()
+        self.send_token_to_the_left()
+
+        #get result from croupier
+        #answer croupier if win,loose,tie
+        self.receive_messages()
+        #get final result from croupier
+        self.receive_messages()
+
+    def execution_croupier(self):
+        #send token and wait till it returns
+        self.send_token_to_the_left()
+        self.wait_for_token()
+
+        #the players just draw their first card. Draw own card.
+        self.draw_single_card()
+
+        #send token and wait till it returns
+        self.send_token_to_the_left()
+        self.wait_for_token()
+        #the players just draw their first card. Broadcast own card.
+        self.send_croupier_card()
+
+        #send token and wait till it returns
+        self.send_token_to_the_left()
+        self.wait_for_token()
+        #draw rest of cards
+        self.draw_more_cards()
+        #broadcast own result
+        #receive answers from player
+        self.retrieve_results()
+
+        #broadcast final results == end of round
+        self.declare_end_of_round()
+
     def process_received_message(self, connection, message):
-        if message.getAction() == "new_card?":
-            amounts = self.count_cards()
-            if min(amounts) > 16:
-                self.send_message_over_socket(connection, self.stay_message)
-            elif min(amounts) <= 16:
-                self.send_message_over_socket(connection, self.hit_message)
-        elif message.getAction() == "card":
-            self.own_cards.append(message.getMessage())
-        elif message.getAction() == "result?":
+        if message.getAction() == "result?":
             amounts = self.count_cards()
             self.final_result = self.nearest_to_21(amounts)
-            result_message = Message("result", self.final_result, sender=self._ID)
+            result_answer = "looser"
+            if message.getMessage() < self.final_result <= 21:
+                result_answer = "winner"
+            elif message.getMessage() == self.final_result <= 21:
+                result_answer = "tie"
+            result_message = Message("result", result_answer, sender=self._ID + ":" + str(self.final_result))
             self.send_message_over_socket(connection, result_message)
         elif message.getAction() == "end":
             self.end_of_round = True
+        elif message.getAction() == "croupier_card":
+            self.croupier_card = message.getMessage()
 
     def choose_new_neighbours(self, amount_neighbours):
         '''
@@ -93,7 +122,7 @@ class BlackJackKnot(AbstractKnot):
         '''
         Leader election und Anordnung der Spieler basierend auf dem Echo Algorithmus.
         Der Prozess mit dem Token ist der Initiator des Echo Algo.
-        Er sendet seine order an alle und erhàlt als Antwort die order von allen anderen.
+        Er sendet seine order an alle und erhaelt als Antwort die order von allen anderen.
         Danach sortiert er die Order und sendet die Tischordnung an alle Prozesse.
         Zu Schluss erfolgt das Auswaehlen der Rollen.
         '''
@@ -108,7 +137,7 @@ class BlackJackKnot(AbstractKnot):
                 answer_socket = self.send_message_to_id(my_order_message, neighbour)
                 answer = self.receive_message_from_socket(answer_socket)
                 self.order_of_players[answer.getMessage()] = answer.getSender()
-            #sortiere dict nach key und gebe Liste mit den Values zurueck
+                #sortiere dict nach key und gebe Liste mit den Values zurueck
             self.order_of_players = [value for (key, value) in sorted(self.order_of_players.items())]
             self.logger.info("Order of players: " + str(self.order_of_players))
             for neighbour in self._neighbours:
@@ -129,31 +158,24 @@ class BlackJackKnot(AbstractKnot):
                 self.logger.fatal("WTF are you sending??")
                 sys.exit(1)
 
+        self.order_of_all = self.order_of_players[:]
+        self.croupier_id = self.order_of_players.pop(0)
+        self.logger.info("ID of croupier: " + str(self.croupier_id))
 
-        ID = self.order_of_players.pop(0)
-        self.croupierID = ID
-        self.logger.info("ID of croupier: " + str(self.croupierID))
-
-        if self.croupierID == self._ID :
+        if self.croupier_id == self._ID:
             self.role = self.CROUPIER
         else:
             self.choose_role(my_order)
 
         # Warte auf den Token ehe mit dem Austeilen der Karten begonnen werden kann
-        if self.token and self.croupierID == self._ID:
+        if self.token and self.croupier_id == self._ID:
             pass
         elif self.token:
             token_message = Message("token", "", sender=self._ID)
-            self.send_message_to_id(token_message, self.croupierID)
+            self.send_message_to_id(token_message, self.croupier_id)
             self.token = False
-        elif self.croupierID == self._ID:
-            socket, received_message = self.return_received_message()
-            if received_message.getAction() == "token":
-                self.token = True
-            else:
-                self.logger.fatal("WTF are you sending??")
-                sys.exit(1)
-
+        elif self.croupier_id == self._ID:
+            self.wait_for_token()
 
     def choose_role(self, order):
         if int(order * 100) % 2 == 0:
@@ -170,43 +192,31 @@ class BlackJackKnot(AbstractKnot):
             return message
         return None
 
-    def give_card_to_players(self):
-        self.logger.debug("Giving cards to players.")
-        for ID in self.order_of_players:
-            card_message = self.draw_card()
-            self.send_message_to_id(card_message, ID)
-        self.logger.debug("Giving cards to players. Finished")
-
-    def draw_card(self):
+    def draw_single_card(self):
         number = self._system_random.choice(self.CARDS)
-        card_message = Message("card", number, sender=self._ID)
-        return card_message
+        self.logger.info("My drawn card is: " + str(number))
+        self.own_cards.append(number)
+        self.logger.info("My hand is now: " + str(self.own_cards))
 
-    def draw_croupier_card(self):
-        self.own_cards.append(self.draw_card().getMessage())
+    def draw_more_cards(self):
+        hit = self.do_i_want_a_new_card()
+        while hit:
+            self.draw_single_card()
+            hit = self.do_i_want_a_new_card()
 
-    def ask_players(self):
-        new_card_message = Message("new_card?", "Do you want a new card?")
-        amount_stayed = 0
-        while amount_stayed < len(self.order_of_players):
-            amount_stayed = 0
-            for ID in self.order_of_players:
-                #TODO NEED A TOKEN
-                socket = self.send_message_to_id(new_card_message, ID)
-                answer = self.receive_message_from_socket(socket)
-                if answer.getAction() == "hit":
-                    card = self.draw_card()
-                    self.send_message_to_id(card, ID)
-                elif answer.getAction() == "stay":
-                    amount_stayed += 1
-        self.logger.debug("All players stayed.")
-
-    def draw_own_cards(self):
-        amount = self.count_croupier_cards()
-        while amount < 17:
-            self.draw_croupier_card()
+    def do_i_want_a_new_card(self):
+        if self.role == self.CROUPIER:
             amount = self.count_croupier_cards()
-        return amount
+            if amount < 17:
+                return True
+            else:
+                return False
+        else:
+            amounts = self.count_cards()
+            if min(amounts) > 16:
+                return False
+            elif min(amounts) <= 16:
+                return True
 
     def count_cards(self):
         possible_results = [0]
@@ -235,43 +245,43 @@ class BlackJackKnot(AbstractKnot):
         return amount
 
     def retrieve_results(self):
-        result_message = Message("result?", "What is your result?")
+        result_message = Message("result?", self.final_result)
         self.results = {}
         for ID in self.order_of_players:
             socket = self.send_message_to_id(result_message, ID)
             answer = self.receive_message_from_socket(socket)
-            self.results[ID] = answer.getMessage()
-
-    def determine_winners(self):
-        overdraw = []
-        valid_result = {}
-        for ID, result in self.results.items():
-            if result is None or result > 21:
-                overdraw.append(ID)
+            if answer.getMessage() in self.results:
+                self.results[answer.getMessage()] += [answer.getSender()]
             else:
-                valid_result[ID] = result
+                self.results[answer.getMessage()] = [answer.getSender()]
 
-        winners = []
-        tie = []
-        if self._ID in overdraw:
-            winners = valid_result.values()
-        else:
-            croupier_result = self.final_result
-            for ID, result in valid_result.items():
-                if result > croupier_result:
-                    winners.append(ID)
-        return winners
-
-    def send_winners(self, winners):
-        winners_message = Message("winners", winners, sender=self._ID)
+    def send_croupier_card(self):
+        croupier_card_message = Message("croupier_card", self.own_cards[0], sender=self._ID)
         for ID in self.order_of_players:
-            self.send_message_to_id(winners_message, ID)
+            self.send_message_to_id(croupier_card_message, ID)
 
     def declare_end_of_round(self):
         self.end_of_round = True
-        end_message = Message("end", "This is the end.", sender=self._ID)
+        self.results["croupier"] = self._ID + ":" + str(self.final_result)
+        end_message = Message("end", self.results, sender=self._ID)
         for ID in self.order_of_players:
             self.send_message_to_id(end_message, ID)
+
+    def send_token_to_the_left(self):
+        token_message = Message("token", "", sender=self._ID)
+        # gib die ID aus, die links von einem steht. Bei der letzten ID nimm die erste.
+        left_neighbour_id = self.order_of_all[
+            (self.order_of_all.index(self._ID) + 1) % len(self.order_of_all)]
+        self.send_message_to_id(token_message, left_neighbour_id)
+        self.token = False
+
+    def wait_for_token(self):
+        socket, received_message = self.return_received_message()
+        if received_message.getAction() == "token":
+            self.token = True
+        else:
+            self.logger.fatal("WTF are you sending?? I am actually waiting for the token.")
+            sys.exit(1)
 
     @staticmethod
     def nearest_to_21(amounts):
@@ -283,14 +293,3 @@ class BlackJackKnot(AbstractKnot):
                 final_result = result
                 difference = temp_diff
         return final_result
-
-
-
-
-
-
-
-
-
-
-
