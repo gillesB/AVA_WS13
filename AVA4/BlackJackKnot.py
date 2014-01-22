@@ -93,7 +93,9 @@ class BlackJackKnot(AbstractKnot):
         '''
         Leader election und Anordnung der Spieler basierend auf dem Echo Algorithmus.
         Der Prozess mit dem Token ist der Initiator des Echo Algo.
-        Er sendet
+        Er sendet seine order an alle und erhàlt als Antwort die order von allen anderen.
+        Danach sortiert er die Order und sendet die Tischordnung an alle Prozesse.
+        Zu Schluss erfolgt das Auswaehlen der Rollen.
         '''
         my_order = self._system_random.random()
         self.order_of_players = dict()
@@ -113,16 +115,20 @@ class BlackJackKnot(AbstractKnot):
                 my_order_message = Message("order", self.order_of_players, sender=self._ID)
                 self.send_message_to_id(my_order_message, neighbour)
         else:
-            #make this consecutive
-            for i in range(2):
-                socket, received_message = self.return_received_message()
-                if received_message.getAction() == "my_order":
-                    self.send_message_over_socket(socket, my_order_message)
-                elif received_message.getAction() == "order":
-                    self.order_of_players = received_message.getMessage()
-                else:
-                    self.logger.fatal("WTF are you sending??")
-                    sys.exit(1)
+            socket, received_message = self.return_received_message()
+            if received_message.getAction() == "my_order":
+                self.send_message_over_socket(socket, my_order_message)
+            else:
+                self.logger.fatal("WTF are you sending??")
+                sys.exit(1)
+
+            socket, received_message = self.return_received_message()
+            if received_message.getAction() == "order":
+                self.order_of_players = received_message.getMessage()
+            else:
+                self.logger.fatal("WTF are you sending??")
+                sys.exit(1)
+
 
         ID = self.order_of_players.pop(0)
         self.croupierID = ID
@@ -133,6 +139,7 @@ class BlackJackKnot(AbstractKnot):
         else:
             self.choose_role(my_order)
 
+        # Warte auf den Token ehe mit dem Austeilen der Karten begonnen werden kann
         if self.token and self.croupierID == self._ID:
             pass
         elif self.token:
