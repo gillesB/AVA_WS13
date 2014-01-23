@@ -104,7 +104,8 @@ class BlackJackKnot(AbstractKnot):
                 result_answer = "winner"
             elif message.getMessage() == self.final_result <= 21:
                 result_answer = "tie"
-            result_message = Message("result", result_answer, sender=self._ID + ":" + str(self.final_result))
+            result_message = Message("result", result_answer,
+                                     sender=self._ID + ":" + str(self.final_result) + ":" + str(self.role[0]))
             self.send_message_over_socket(connection, result_message)
         elif message.getAction() == "end":
             self.end_of_round = True
@@ -211,12 +212,53 @@ class BlackJackKnot(AbstractKnot):
                 return True
             else:
                 return False
+        elif self.role == self.SAFE:
+            return self.choose_it_safely()
         else:
             amounts = self.count_cards()
             if min(amounts) > 16:
                 return False
             elif min(amounts) <= 16:
                 return True
+
+    def choose_it_safely(self):
+        '''
+        return True = Hit
+        return False = Stay
+        Sollte mit ner coolen Matrix irgendwie programmiert werden. Aber das hier soll erst mal reichen.
+        '''
+        amounts = self.count_cards()
+        # obviously
+        if 21 in amounts:
+            return False
+
+        # soft hand
+        if 11 in self.own_cards and len(self.own_cards) == 2:
+            if [2, 3, 4, 5, 6 in self.own_cards][-1]:
+                return True
+            elif 7 in self.own_cards:
+                if self.croupier_card <= 8:
+                    return False
+                else:
+                    return True
+            elif [8, 9 in self.own_cards][-1]:
+                return False
+
+        #hard hand
+        if min(amounts) < 11:
+            return True
+        elif min(amounts) == 12:
+            if self.croupier_card <= 3 or self.croupier_card >= 7:
+                return True
+            else:
+                return False
+        elif min(amounts) <= 16:
+            if self.croupier_card <= 6:
+                return False
+            else:
+                return True
+        else:  # 17-20
+            return False
 
     def count_cards(self):
         possible_results = [0]
