@@ -234,14 +234,15 @@ class BlackJackKnot(AbstractKnot):
 
         # soft hand
         if 11 in self.own_cards and len(self.own_cards) == 2:
-            if [2, 3, 4, 5, 6 in self.own_cards][-1]:
+            # hat der Spieler eine 2, 3, 4, 5 oder 6 auf der hand
+            if any(number in self.own_cards for number in [2, 3, 4, 5, 6]):
                 return True
             elif 7 in self.own_cards:
                 if self.croupier_card <= 8:
                     return False
                 else:
                     return True
-            elif [8, 9 in self.own_cards][-1]:
+            elif any(number in self.own_cards for number in [8, 9]):
                 return False
 
         #hard hand
