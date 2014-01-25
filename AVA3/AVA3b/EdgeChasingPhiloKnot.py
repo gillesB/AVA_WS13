@@ -1,5 +1,7 @@
+import socket
 import time
 from datetime import datetime
+import cPickle
 from AVA3.PhiloCodeBase.BasicPhilosopherKnot import BasicPhilosopherKnot
 from CodeBase.Message import Message
 
@@ -23,6 +25,13 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
             self.order_and_receive_forks()
             self.eat()
             self.return_forks()
+
+
+    def open_port(self):
+        super(EdgeChasingPhiloKnot, self).open_port()
+        # set timeout
+        seconds = 3 + self._system_random.random()
+        self._listeningSocket.settimeout(seconds)
 
     #Uberschreibungen den Methoden die wahrscheinlich Deadlock ausloesen
     def think(self):
@@ -78,13 +87,16 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
                 else:
                     self.logger.info("Strange another case appeared. No deadlock was found.")
         elif message.getAction() == "checkDeadlock":
-            is_deadlock_message = Message("isDeadlock", list(self._ID), True, self._ID)
-            if not self.waiting_for:
-                self.logger.info("Having both forks. No deadlock.")
-            else:
-                self.logger.info("Sending isDeadlock message to requested fork.")
-                self.requested_fork_at_possible_deadlock = self.waiting_for
-                self.send_message_to_id(is_deadlock_message, self.waiting_for)
+            self.check_deadlock()
+
+    def check_deadlock(self):
+        is_deadlock_message = Message("isDeadlock", list(self._ID), True, self._ID)
+        if not self.waiting_for:
+            self.logger.info("Having both forks. No deadlock.")
+        else:
+            self.logger.info("Sending isDeadlock message to requested fork.")
+            self.requested_fork_at_possible_deadlock = self.waiting_for
+            self.send_message_to_id(is_deadlock_message, self.waiting_for)
 
     def resolve_deadlock(self):
         '''
@@ -129,6 +141,27 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
             self.logger.info("I received the two forks.")
         else:
             self.logger.error("This should never happen.")
+
+    def receive_messages(self):
+        '''
+        * Empfaengt eine Nachricht auf dem Port auf dem der Prozess hoert.
+        * Deserialisiert die Nachricht
+        * loggt die Nachricht
+        * verarbeitet die Nachricht in der abstrakten Methode process_received_message()
+        * wartet allerdings nur bis zum Timeout, danach wird ueberprueft ob ein Deadlock vorliegt
+        '''
+        try:
+            connection, addr = self._listeningSocket.accept()
+            data = connection.recv(1024)
+            if data:
+                message = cPickle.loads(data)
+                self.logger.info("empfangen: " + message.printToString())
+                self.process_received_message(connection, message)
+        except socket.timeout:
+            self.logger.info("Got a timeout while waiting for a new message. Checking if it could be a deadlock.")
+            self.check_deadlock()
+
+
 
 
 
