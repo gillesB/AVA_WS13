@@ -92,6 +92,9 @@ class BlackJackKnot(AbstractKnot):
         #receive answers from player
         self.retrieve_results()
 
+        #write statistics
+        self.write_statistics()
+
         #broadcast final results == end of round
         self.declare_end_of_round()
 
@@ -234,7 +237,7 @@ class BlackJackKnot(AbstractKnot):
 
         # soft hand
         if 11 in self.own_cards and len(self.own_cards) == 2:
-            # hat der Spieler eine 2, 3, 4, 5 oder 6 auf der hand
+            # hat der Spieler eine 2, 3, 4, 5 oder 6 auf der Hand?
             if any(number in self.own_cards for number in [2, 3, 4, 5, 6]):
                 return True
             elif 7 in self.own_cards:
@@ -325,6 +328,31 @@ class BlackJackKnot(AbstractKnot):
         else:
             self.logger.fatal("WTF are you sending?? I am actually waiting for the token.")
             sys.exit(1)
+
+    def write_statistics(self):
+        self.logger.info("writing statistics")
+        # are there any winners?
+        if "winner" not in self.results:
+            self.read_stat_file_and_raise_its_value("wins_croupier", 1)
+        else:
+            safe_wins = 0
+            risk_wins = 0
+            for winner in self.results["winner"]:
+                if "s" in winner:
+                    safe_wins += 1
+                elif "r" in winner:
+                    risk_wins += 1
+            self.read_stat_file_and_raise_its_value("wins_safe", safe_wins)
+            self.read_stat_file_and_raise_its_value("wins_risk", risk_wins)
+
+    @staticmethod
+    def read_stat_file_and_raise_its_value(filename, raise_by):
+        with open("./Logging/" + filename, "r+") as stat_file:
+            amount_winners = int(stat_file.read())
+            amount_winners += raise_by
+            stat_file.seek(0)
+            stat_file.write(str(amount_winners))
+
 
     @staticmethod
     def nearest_to_21(amounts):
