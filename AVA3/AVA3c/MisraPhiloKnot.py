@@ -73,6 +73,7 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
         Ordere und erhalte Gabeln.
         '''
         while not (self.has_right_fork and self.has_left_fork):
+            self.logger.info("Check for the right fork.")
             if not self.has_right_fork:
                 self.logger.info("Waiting for the right fork.")
                 self.order_right_fork()
@@ -80,6 +81,10 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
                     self.receive_messages()
                 self.logger.info("I received the right fork.")
                 self.right_fork_clean = True
+            else:
+                self.logger.info("Already got the right fork.")
+
+            self.logger.info("Check for the left fork.")
             if not self.has_left_fork:
                 self.logger.info("Waiting for the left fork.")
                 self.order_left_fork()
@@ -87,6 +92,9 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
                     self.receive_messages()
                 self.logger.info("I received the left fork.")
                 self.left_fork_clean = True
+            else:
+                self.logger.info("Already got the left fork.")
+
         if self.has_right_fork and self.has_left_fork:
             self.logger.info("I received the two forks.")
         else:
@@ -121,6 +129,22 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
         if self.send_message_to_id(force_fork_message, self.leftNeighbour):
             self.has_left_fork = True
             self.left_fork_clean = False
+
+    def think(self):
+        '''
+        Der Philosoph denkt fuer eine bestimmte Zeit. Er ist waehrendem blockiert.
+        '''
+        time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
+        self.logger.info("I am thinking now for " + str(time_to_think) + " seconds.")
+        self.wait_and_listen(time_to_think)
+
+    def eat(self):
+        '''
+        Der Philosoph isst fuer eine bestimmte Zeit. Er ist waehrendem blockiert.
+        '''
+        time_to_eat = self._system_random.randint(0, BasicPhilosopherKnot.TIME_EAT_MAX) / 1000.0 # [s = ms / 1000]
+        self.logger.info("I am eating now for " + str(time_to_eat) + " seconds.")
+        self.wait_and_listen(time_to_eat)
 
     def wait_and_listen(self, seconds):
         '''
