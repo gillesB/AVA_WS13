@@ -1,4 +1,3 @@
-from random import SystemRandom
 from CodeBase.AbstractKnot import AbstractKnot
 from CodeBase.Message import Message
 

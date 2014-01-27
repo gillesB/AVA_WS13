@@ -1,5 +1,3 @@
-import socket
-import struct
 import time
 import cPickle
 from AVA1.AVA1_a.Watchman import Watchman
