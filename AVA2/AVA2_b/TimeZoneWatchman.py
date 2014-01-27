@@ -54,6 +54,10 @@ class TimeZoneWatchman(Watchman):
             self.logger.info("Algo ist NICHT terminiert. (" + str(S) + ", " + str(R) + ")")
 
     def send_check_message(self, timezones, localKnot_id):
+        '''
+        * Sende eine terminationCheck-Nachricht an einen KontoKnoten
+        * Verarbeite seine Antwort und gebe sein s und r zurueck
+        '''
         socket_o = self.send_message_to_id(localKnot_id, self._check_message)
         if socket_o:
             data = socket_o.recv(1024)

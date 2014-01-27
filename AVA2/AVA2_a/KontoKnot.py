@@ -24,9 +24,12 @@ class KontoKnot(AbstractKnot):
         self.kontostand = 0
 
     def run(self):
+        # waehle neuen Kontostand
         self.init_start_konto_betrag()
+        # oeffne Port
         self.read_connections_and_open_port()
         while True:
+            # empfange Nachrichten
             self.receive_messages()
 
     def init_start_konto_betrag(self):

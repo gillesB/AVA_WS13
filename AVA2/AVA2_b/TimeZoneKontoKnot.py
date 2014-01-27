@@ -32,7 +32,8 @@ class TimeZoneKontoKnot(AbstractKnot):
         self.__saved_s = -1
         self.__saved_r = -1
 
-        #Anzahl wie haeufig die Kontoabzuge an die Nachbarn versendet werden muessen
+        # Anzahl wie haeufig die Kontoabzuge an die Nachbarn versendet werden muessen
+        # Dieser Zaehler wurde wegen den kuenstlichen Pausen eingefuehrt
         self.amount_abzuege = 0
 
     def run(self):
@@ -52,7 +53,7 @@ class TimeZoneKontoKnot(AbstractKnot):
 
     def process_received_message(self, connection, message):
         if message.getAction() == 'konto_abzug':
-            self.process_konto_abzug(connection,message)
+            self.process_konto_abzug(connection, message)
         elif message.getAction() == 'init':
             self.amount_abzuege = 1
             self.send_konto_abzuege()
@@ -61,10 +62,17 @@ class TimeZoneKontoKnot(AbstractKnot):
             self.send_amount_messages_to_observer(connection, message)
 
     def process_konto_abzug(self, connection, message):
+        '''
+        * Ueberpruefen, ob die empfangen Nachricht aus der Zukunft stammt
+        * Falls ja, Zaehler zwischen speichern
+        * Nachrichtenzaehler r um eins erhoehen.
+        * eigener Kontostand verringern
+        * Nachrichten an Nachbarn senden, so dass diese ihren Kontostand verringern
+        '''
         if self.__saved_s == -1 and self.__time_zone < message.time_zone:
             self.__saved_s = self._amount_messages_sent
             self.__saved_r = self._amount_messages_received
-        #r um 1 erhoehen
+            #r um 1 erhoehen
         self._amount_messages_received += 1
         konto_abzug = message.getMessage()
         self.eigener_konto_abzug(konto_abzug)
@@ -77,8 +85,8 @@ class TimeZoneKontoKnot(AbstractKnot):
 
     def send_konto_abzuege(self):
         '''
-        Da diese Funktion oefter aufgerufen wird als noetig, muss ueberprueft werden ob ueberhaupt gesendet werden darf.
-        Dies geschiet ueber amount_abzuege.
+        Da diese Funktion oefter aufgerufen wird als noetig, durch die eingefuegten Pausen, muss ueberprueft werden ob
+        ueberhaupt gesendet werden darf. Dies geschiet ueber amount_abzuege.
         '''
         if self.kontostand > 0 and self.amount_abzuege > 0:
             konto_abzug = self._system_random.randint(1, TimeZoneKontoKnot.MAX_DIFF)
@@ -86,7 +94,8 @@ class TimeZoneKontoKnot(AbstractKnot):
             amount_neighbours = self._system_random.randint(1, TimeZoneKontoKnot.MAX_N)
             self.choose_new_neighbours(amount_neighbours)
 
-            konto_abzug_message = TimeZoneMessage('konto_abzug', konto_abzug, sender=self._ID, time_zone=self.__time_zone)
+            konto_abzug_message = TimeZoneMessage('konto_abzug', konto_abzug, sender=self._ID,
+                                                  time_zone=self.__time_zone)
             self.logger.info("Sende Nachrichten an: " + str(self._neighbours.keys()))
             for neighbourID in self._neighbours.keys():
                 if self.send_message_to_id(konto_abzug_message, neighbourID):
@@ -116,6 +125,7 @@ class TimeZoneKontoKnot(AbstractKnot):
     def wait_and_listen(self, seconds):
         '''
         Wartet eine gewisse Zeit und lauscht waehrendem auf dem offenen Port.
+        Im Gegensatz zu sleep gehen keine Nachrichten verloren wenn gewartet wird.
         '''
         now = datetime.datetime.now()
         wait_till = now + datetime.timedelta(0, seconds)
