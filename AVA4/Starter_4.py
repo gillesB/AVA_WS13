@@ -7,7 +7,7 @@ if __name__ == '__main__':
     filename = './json_data'
 
     for num in range(8):
-        l = BlackJackKnot(num, filename, 5)
+        l = BlackJackKnot(num, filename, 100)
         if num == 0:
             l.token = True
         l.start()

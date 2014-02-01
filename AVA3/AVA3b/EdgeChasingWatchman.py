@@ -8,6 +8,7 @@ class EdgeChasingWatchman(AbstractWatchman):
     '''
     Ein einfacher Beobachter, der von einem Benutzer gesteuert werden kann. Er kann zwei Arten Nachrichten an die Knoten
     versenden. checkDeadlock Nachrichten und Suicide Nachrichten.
+    WIRD MIT DER AUTOMATISCHEN AUFLOESUNG DES DEADLOCKES NICHT MEHR BENOETIGT.
     '''
 
     def __init__(self, topology_filename):

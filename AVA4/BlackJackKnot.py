@@ -209,7 +209,7 @@ class BlackJackKnot(AbstractKnot):
             hit = self.do_i_want_a_new_card()
 
     def do_i_want_a_new_card(self):
-        if self.role == self.CROUPIER:
+        if self.role  == self.CROUPIER:
             amount = self.count_croupier_cards()
             if amount < 17:
                 return True
