@@ -18,36 +18,19 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
         self.read_connections_file()
         self.open_port()
         self.choose_new_neighbours()
-        while True:
-            self.wait_till_full_second()
+        while self.have_i_still_time_to_run():
             self.think()
             self.logger.info("I want to eat now.")
             self.order_and_receive_forks()
             self.eat()
             self.return_forks()
-
-
-    def open_port(self):
-        super(EdgeChasingPhiloKnot, self).open_port()
-        # set timeout
-        seconds = 3 + self._system_random.random()
-        self._listeningSocket.settimeout(seconds)
-
-    #Uberschreibungen den Methoden die wahrscheinlich Deadlock ausloesen
-    def think(self):
-        time_to_think = 2  # [s = ms / 1000]
-        self.logger.info("I am thinking now for " + str(time_to_think) + " seconds.")
-        time.sleep(time_to_think)
-
-    def eat(self):
-        time_to_eat = 2  # [s = ms / 1000]
-        self.logger.info("I am eating now for " + str(time_to_eat) + " seconds.")
-        time.sleep(time_to_eat)
+        self.print_final_information()
 
     @staticmethod
     def wait_till_full_second():
         '''
-        Warte bis zur naechten vollen Sekunde, so dass Deadlock wahrscheinlicher wird
+        Warte bis zur naechten vollen Sekunde, so dass Deadlock wahrscheinlicher wird.
+        Darf bei der Auswertung nicht mehr verwendet werden. Bremst den Algorithmus aus
         '''
         now = datetime.now()
         time.sleep(1 - now.microsecond / 1000000.0)
@@ -150,6 +133,8 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
         * verarbeitet die Nachricht in der abstrakten Methode process_received_message()
         * wartet allerdings nur bis zum Timeout, danach wird ueberprueft ob ein Deadlock vorliegt
         '''
+        seconds = self.TIME_EAT_MAX / 250.0
+        self._listeningSocket.settimeout(seconds)
         try:
             connection, addr = self._listeningSocket.accept()
             data = connection.recv(1024)
@@ -157,6 +142,7 @@ class EdgeChasingPhiloKnot(BasicPhilosopherKnot):
                 message = cPickle.loads(data)
                 self.logger.info("empfangen: " + message.printToString())
                 self.process_received_message(connection, message)
+                self.amount_received_messages += 1
         except socket.timeout:
             self.logger.info("Got a timeout while waiting for a new message. Checking if it could be a deadlock.")
             self.check_deadlock()

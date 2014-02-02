@@ -21,7 +21,7 @@ class TokenPhilosopherKnot(BasicPhilosopherKnot):
         self.read_connections_file()
         self.open_port()
         self.choose_new_neighbours()
-        while True:
+        while self.have_i_still_time_to_run():
             self.think()
             self.logger.info("I want to eat now. Waiting for the token.")
             while not self.token:
@@ -39,6 +39,7 @@ class TokenPhilosopherKnot(BasicPhilosopherKnot):
             self.eat()
             self.return_forks()
             self.send_token_to_next_philosopher()
+        self.print_final_information()
 
     def process_received_message(self, connection, message):
         super(TokenPhilosopherKnot, self).process_received_message(connection, message)

@@ -19,6 +19,8 @@ if __name__ == '__main__':
             l = TokenPhilosopherKnot(num, filename, topology_filename)
         else:
             l = TokenForkKnot(num, filename, topology_filename)
+        if num == 0:
+            l.token = True
         l.start()
 
     time.sleep(0.5)

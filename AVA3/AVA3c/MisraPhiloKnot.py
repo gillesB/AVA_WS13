@@ -1,7 +1,4 @@
-import socket
 import time
-import cPickle
-import datetime
 from AVA3.PhiloCodeBase.BasicPhilosopherKnot import BasicPhilosopherKnot
 from CodeBase.Message import Message
 
@@ -32,7 +29,7 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
         elif self.force_forks == 2:
             self.force_right_fork()
             self.force_left_fork()
-        while True:
+        while self.have_i_still_time_to_run():
             self.think()
             self.treat_clean_requests()
             self.logger.info("I want to eat now.")
@@ -40,6 +37,13 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             self.eat()
             self.make_forks_dirty()
             self.treat_clean_requests()
+        make_clean_message = Message("setClean", True, sender=self._ID)
+        if self.has_right_fork:
+            self.send_message_to_id(make_clean_message, self.rightNeighbour)
+        if self.has_left_fork:
+            self.send_message_to_id(make_clean_message, self.leftNeighbour)
+        self.return_forks()
+        self.print_final_information()
 
     def process_received_message(self, connection, message):
         super(MisraPhiloKnot, self).process_received_message(connection, message)
@@ -130,43 +134,6 @@ class MisraPhiloKnot(BasicPhilosopherKnot):
             self.has_left_fork = True
             self.left_fork_clean = False
 
-    def think(self):
-        '''
-        Der Philosoph denkt fuer eine bestimmte Zeit. Er ist waehrendem blockiert.
-        '''
-        time_to_think = self._system_random.randint(0, BasicPhilosopherKnot.TIME_THINK_MAX) / 1000.0  # [s = ms / 1000]
-        self.logger.info("I am thinking now for " + str(time_to_think) + " seconds.")
-        self.wait_and_listen(time_to_think)
-
-    def eat(self):
-        '''
-        Der Philosoph isst fuer eine bestimmte Zeit. Er ist waehrendem blockiert.
-        '''
-        time_to_eat = self._system_random.randint(0, BasicPhilosopherKnot.TIME_EAT_MAX) / 1000.0 # [s = ms / 1000]
-        self.logger.info("I am eating now for " + str(time_to_eat) + " seconds.")
-        self.wait_and_listen(time_to_eat)
-
-    def wait_and_listen(self, seconds):
-        '''
-        Wartet eine gewisse Zeit und lauscht waehrendem auf dem offenen Port.
-        '''
-        now = datetime.datetime.now()
-        wait_till = now + datetime.timedelta(0, seconds)
-        while seconds > 0.0001:
-            self.logger.info("Still waiting for " + str(seconds))
-            try:
-                self._listeningSocket.settimeout(seconds)
-                connection, addr = self._listeningSocket.accept()
-                data = connection.recv(1024)
-                if data:
-                    message = cPickle.loads(data)
-                    self.logger.info("empfangen: " + message.printToString())
-                    self.process_received_message(connection, message)
-            except socket.timeout:
-                pass
-            now = datetime.datetime.now()
-            seconds = (wait_till - now).total_seconds()
-        self._listeningSocket.settimeout(None)
 
 
 
